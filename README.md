@@ -107,13 +107,11 @@ wxo-extension/                    # Chrome Extension (Frontend)
     ├── uv.lock                   # Locked dependency versions                       
     ├── .env.example              # Environment variables
     └── app/
-        ├── __init__.py
         ├── main.py                # FastAPI app, CORS, lifespan
         ├── config.py              # Pydantic settings from .env
         ├── auth.py                # IAM token manager (cache + refresh)
         ├── models.py              # Request/response Pydantic models
         └── routes/
-            ├── __init__.py
             └── chat.py             # /chat/stream endpoint + flow polling
 ```
 
