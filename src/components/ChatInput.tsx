@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 
-/* Carbon icons */
 const IconSend = () => (
   <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
     <path d="M27.45 15.11l-22-11a1 1 0 00-1.08.12 1 1 0 00-.33 1L7 16 4 26.74A1 1 0 005 28a1 1 0 00.45-.11l22-11a1 1 0 000-1.78zM6.82 25.36L9 17h8v-2H9L6.82 6.64 24.32 16z" />
@@ -13,9 +12,16 @@ const IconStop = () => (
   </svg>
 );
 
-export default function ChatInput({ onSend, onStop, isStreaming, disabled }) {
+interface ChatInputProps {
+  onSend: (text: string) => void;
+  onStop: () => void;
+  isStreaming: boolean;
+  disabled?: boolean;
+}
+
+export default function ChatInput({ onSend, onStop, isStreaming, disabled }: ChatInputProps) {
   const [text, setText] = useState("");
-  const textareaRef = useRef(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -36,7 +42,7 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }) {
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -47,7 +53,6 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }) {
 
   return (
     <div className="border-t border-border-subtle-00 bg-background p-4">
-      {/* Carbon text-area + button combo */}
       <div className="flex items-end gap-0">
         <div className="flex-1 bg-layer-01 border-b-2 border-border-strong-01 has-[:focus]:border-interactive has-[:focus]:outline has-[:focus]:outline-2 has-[:focus]:outline-focus has-[:focus]:-outline-offset-2 transition-colors h-[42px] flex items-center">
           <textarea
