@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { getSyncStorage, setSyncStorage } from "./utils/storage";
+import { getStorage, getSyncStorage, setSyncStorage } from "./utils/storage";
 import "./index.css";
 
 function Options() {
@@ -8,6 +8,12 @@ function Options() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    // Load theme preference
+    getStorage(["theme"]).then((data) => {
+      if (data.theme) {
+        document.documentElement.setAttribute("data-theme", data.theme);
+      }
+    });
     getSyncStorage(["proxyUrl"]).then((data) => {
       if (data.proxyUrl) setProxyUrl(data.proxyUrl);
     });
