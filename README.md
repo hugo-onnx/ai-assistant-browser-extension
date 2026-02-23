@@ -87,34 +87,34 @@ wxo-extension/                    # Chrome Extension (Frontend)
 │   ├── background.js             # Service worker (side panel behavior)
 │   └── icons/                    # Extension icons (16, 48, 128px)
 ├── src/
-│    ├── index.css                 # Carbon g100 theme tokens + markdown styles
-│    ├── sidepanel.jsx             # React mount for side panel
-│    ├── options.jsx               # Settings page (proxy URL config)
+│    ├── index.css                # Carbon g100 theme tokens + markdown styles
+│    ├── sidepanel.jsx            # React mount for side panel
+│    ├── options.jsx              # Settings page (proxy URL config)
 │    ├── components/
-│    │   ├── App.jsx               # Main layout (header + chat + input)
-│    │   ├── Header.jsx            # Carbon UI Shell header bar
-│    │   ├── ChatMessage.jsx       # User & assistant message bubbles
-│    │   ├── ChatInput.jsx         # Text input + send/stop button
-│    │   └── WelcomeScreen.jsx     # Landing screen with suggestion tiles
+│    │   ├── App.jsx              # Main layout (header + chat + input)
+│    │   ├── Header.jsx           # Carbon UI Shell header bar
+│    │   ├── ChatMessage.jsx      # User & assistant message bubbles
+│    │   ├── ChatInput.jsx        # Text input + send/stop button
+│    │   └── WelcomeScreen.jsx    # Landing screen with suggestion tiles
 │    ├── hooks/
-│    │   └── useChat.js            # Chat state, SSE streaming, flow events
+│    │   └── useChat.js           # Chat state, SSE streaming, flow events
 │    └── utils/
-│        ├── markdown.js           # Marked + highlight.js renderer
-│        └── storage.js            # chrome.storage abstraction
+│        ├── markdown.js          # Marked + highlight.js renderer
+│        └── storage.js           # chrome.storage abstraction
 │
-└── proxy-server/                  # FastAPI Proxy Server (Backend)
-    ├── pyproject.toml             # Project metadata & dependencies
-    ├── uv.lock                    # Locked dependency versions                       
-    ├── .env.example               # Environment variables
+└── proxy-server/                 # FastAPI Proxy Server (Backend)
+    ├── pyproject.toml            # Project metadata & dependencies
+    ├── uv.lock                   # Locked dependency versions                       
+    ├── .env.example              # Environment variables
     └── app/
         ├── __init__.py
-        ├── main.py                   # FastAPI app, CORS, lifespan
-        ├── config.py                 # Pydantic settings from .env
-        ├── auth.py                   # IAM token manager (cache + refresh)
-        ├── models.py                 # Request/response Pydantic models
+        ├── main.py                # FastAPI app, CORS, lifespan
+        ├── config.py              # Pydantic settings from .env
+        ├── auth.py                # IAM token manager (cache + refresh)
+        ├── models.py              # Request/response Pydantic models
         └── routes/
             ├── __init__.py
-            └── chat.py               # /chat/stream endpoint + flow polling
+            └── chat.py             # /chat/stream endpoint + flow polling
 ```
 
 ---
