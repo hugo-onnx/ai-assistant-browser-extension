@@ -4,10 +4,13 @@ const SUGGESTIONS = [
   "Search for open tasks",
 ];
 
-export default function WelcomeScreen({ onSuggestionClick }) {
+interface WelcomeScreenProps {
+  onSuggestionClick: (text: string) => void;
+}
+
+export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-      {/* Logo */}
       <div
         className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
         style={{ background: "var(--color-button-primary)" }}
@@ -15,7 +18,6 @@ export default function WelcomeScreen({ onSuggestionClick }) {
         <span className="text-xl font-bold text-white tracking-tight">wx</span>
       </div>
 
-      {/* Carbon productive heading */}
       <h2 className="text-base font-semibold text-text-primary mb-1">
         watsonx Orchestrate
       </h2>
@@ -23,7 +25,6 @@ export default function WelcomeScreen({ onSuggestionClick }) {
         How can I help you today?
       </p>
 
-      {/* Suggestion tiles — Carbon clickable-tile pattern */}
       <div className="flex flex-col gap-1 w-full max-w-[280px]">
         {SUGGESTIONS.map((suggestion) => (
           <button
