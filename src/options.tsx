@@ -8,14 +8,14 @@ function Options() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    // Load theme preference
     getStorage(["theme"]).then((data) => {
       if (data.theme) {
-        document.documentElement.setAttribute("data-theme", data.theme);
+        document.documentElement.setAttribute("data-theme", data.theme as string);
       }
     });
+
     getSyncStorage(["proxyUrl"]).then((data) => {
-      if (data.proxyUrl) setProxyUrl(data.proxyUrl);
+      if (data.proxyUrl) setProxyUrl(data.proxyUrl as string);
     });
   }, []);
 
@@ -50,7 +50,6 @@ function Options() {
 
         {/* Carbon form group */}
         <div className="bg-layer-01 p-8">
-          {/* Carbon text-input */}
           <div className="mb-8">
             <label className="block text-sm font-normal text-text-secondary mb-2">
               Proxy Server URL
@@ -68,7 +67,6 @@ function Options() {
             </p>
           </div>
 
-          {/* Carbon primary button */}
           <button
             onClick={handleSave}
             className="w-full h-14 flex items-center justify-between px-5 text-base font-normal text-text-on-color transition-colors"
@@ -105,7 +103,7 @@ function Options() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Options />
   </React.StrictMode>
