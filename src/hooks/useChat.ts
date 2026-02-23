@@ -1,44 +1,57 @@
 import { useState, useCallback, useRef } from "react";
 import { getStorage, setStorage, getSyncStorage } from "../utils/storage";
+import type { ChatMessage, SSEEvent } from "../types";
 
 const DEFAULT_PROXY_URL = "http://localhost:8000";
 
-export function useChat() {
-  const [messages, setMessages] = useState([]);
+interface UseChatReturn {
+  messages: ChatMessage[];
+  isStreaming: boolean;
+  threadId: string | null;
+  error: string | null;
+  sendMessage: (text: string) => Promise<void>;
+  stopStreaming: () => void;
+  clearChat: () => Promise<void>;
+  retryLast: () => Promise<void>;
+  loadState: () => Promise<void>;
+}
+
+export function useChat(): UseChatReturn {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [threadId, setThreadId] = useState(null);
-  const [error, setError] = useState(null);
-  const abortRef = useRef(null);
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const loadState = useCallback(async () => {
     const local = await getStorage(["messages", "threadId"]);
-    if (local.messages) setMessages(local.messages);
-    if (local.threadId) setThreadId(local.threadId);
+    if (local.messages) setMessages(local.messages as ChatMessage[]);
+    if (local.threadId) setThreadId(local.threadId as string);
   }, []);
 
-  const saveState = useCallback(async (msgs, tid) => {
+  const saveState = useCallback(async (msgs: ChatMessage[], tid: string | null) => {
     await setStorage({ messages: msgs, threadId: tid });
   }, []);
 
-  const getProxyUrl = useCallback(async () => {
+  const getProxyUrl = useCallback(async (): Promise<string> => {
     const sync = await getSyncStorage(["proxyUrl"]);
-    return sync.proxyUrl || DEFAULT_PROXY_URL;
+    return (sync.proxyUrl as string) || DEFAULT_PROXY_URL;
   }, []);
 
   const sendMessage = useCallback(
-    async (text) => {
+    async (text: string) => {
       if (!text.trim() || isStreaming) return;
 
       setError(null);
 
-      const userMessage = {
+      const userMessage: ChatMessage = {
         id: Date.now().toString(),
         role: "user",
         content: text.trim(),
         timestamp: new Date().toISOString(),
       };
 
-      const assistantMessage = {
+      const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "",
@@ -69,7 +82,7 @@ export function useChat() {
           throw new Error(`Proxy error: ${response.status}`);
         }
 
-        const reader = response.body.getReader();
+        const reader = response.body!.getReader();
         const decoder = new TextDecoder();
         let fullText = "";
         let newThreadId = threadId;
@@ -81,7 +94,6 @@ export function useChat() {
 
           buffer += decoder.decode(value, { stream: true });
 
-          // Parse SSE lines
           const lines = buffer.split("\n");
           buffer = lines.pop() || "";
 
@@ -93,7 +105,7 @@ export function useChat() {
             if (!dataStr) continue;
 
             try {
-              const event = JSON.parse(dataStr);
+              const event: SSEEvent = JSON.parse(dataStr);
 
               if (event.event === "delta" && event.text) {
                 fullText += event.text;
@@ -101,23 +113,16 @@ export function useChat() {
                   const updated = [...prev];
                   const last = updated[updated.length - 1];
                   if (last && last.role === "assistant") {
-                    updated[updated.length - 1] = {
-                      ...last,
-                      content: fullText,
-                    };
+                    updated[updated.length - 1] = { ...last, content: fullText };
                   }
                   return updated;
                 });
               } else if (event.event === "new_message") {
-                // Multi-step flow: finalize current bubble, start a new one
                 setMessages((prev) => {
                   const updated = [...prev];
                   const last = updated[updated.length - 1];
                   if (last && last.role === "assistant") {
-                    updated[updated.length - 1] = {
-                      ...last,
-                      isStreaming: false,
-                    };
+                    updated[updated.length - 1] = { ...last, isStreaming: false };
                   }
                   updated.push({
                     id: Date.now().toString(),
@@ -129,21 +134,14 @@ export function useChat() {
                   return updated;
                 });
                 fullText = "";
-              } else if (
-                event.event === "status" ||
-                event.event === "flow_status"
-              ) {
-                // Show agent processing status in the current bubble
+              } else if (event.event === "status" || event.event === "flow_status") {
                 const statusText = event.message || "";
                 if (statusText) {
                   setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[updated.length - 1];
                     if (last && last.role === "assistant") {
-                      updated[updated.length - 1] = {
-                        ...last,
-                        statusText,
-                      };
+                      updated[updated.length - 1] = { ...last, statusText };
                     }
                     return updated;
                   });
@@ -156,8 +154,8 @@ export function useChat() {
                 throw new Error(event.message || "Stream error");
               }
             } catch (parseErr) {
-              if (parseErr.message !== "Stream error" && !parseErr.message?.startsWith("Proxy")) {
-                // JSON parse error, skip this line
+              const msg = (parseErr as Error).message;
+              if (msg !== "Stream error" && !msg?.startsWith("Proxy")) {
                 continue;
               }
               throw parseErr;
@@ -165,15 +163,11 @@ export function useChat() {
           }
         }
 
-        // Finalize
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
           if (last && last.role === "assistant") {
-            updated[updated.length - 1] = {
-              ...last,
-              isStreaming: false,
-            };
+            updated[updated.length - 1] = { ...last, isStreaming: false };
           }
           saveState(updated, newThreadId);
           return updated;
@@ -181,9 +175,9 @@ export function useChat() {
 
         if (newThreadId) setThreadId(newThreadId);
       } catch (err) {
-        if (err.name === "AbortError") return;
+        if ((err as Error).name === "AbortError") return;
 
-        setError(err.message);
+        setError((err as Error).message);
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
@@ -211,16 +205,13 @@ export function useChat() {
       abortRef.current = null;
       setIsStreaming(false);
 
-      // Finalize (or remove) the last assistant message
       setMessages((prev) => {
         const updated = [...prev];
         const last = updated[updated.length - 1];
         if (last && last.role === "assistant") {
           if (last.content) {
-            // Has partial content — keep it but mark as done
             updated[updated.length - 1] = { ...last, isStreaming: false, statusText: undefined };
           } else {
-            // Empty bubble — remove it
             updated.pop();
           }
         }
@@ -240,7 +231,6 @@ export function useChat() {
   const retryLast = useCallback(async () => {
     if (isStreaming) return;
 
-    // Find the last user message
     let lastUserIndex = -1;
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].role === "user") {
@@ -251,15 +241,11 @@ export function useChat() {
     if (lastUserIndex === -1) return;
 
     const lastUserText = messages[lastUserIndex].content;
-
-    // Remove the last user message and all assistant messages after it
     const trimmed = messages.slice(0, lastUserIndex);
     setMessages(trimmed);
     setError(null);
     await saveState(trimmed, threadId);
 
-    // Resend
-    // Small delay to let state settle before sendMessage reads it
     setTimeout(() => sendMessage(lastUserText), 50);
   }, [messages, threadId, isStreaming, saveState, sendMessage]);
 
