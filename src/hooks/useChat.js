@@ -208,9 +208,27 @@ export function useChat() {
   const stopStreaming = useCallback(() => {
     if (abortRef.current) {
       abortRef.current.abort();
+      abortRef.current = null;
       setIsStreaming(false);
+
+      // Finalize (or remove) the last assistant message
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last && last.role === "assistant") {
+          if (last.content) {
+            // Has partial content — keep it but mark as done
+            updated[updated.length - 1] = { ...last, isStreaming: false, statusText: undefined };
+          } else {
+            // Empty bubble — remove it
+            updated.pop();
+          }
+        }
+        saveState(updated, threadId);
+        return updated;
+      });
     }
-  }, []);
+  }, [saveState, threadId]);
 
   const clearChat = useCallback(async () => {
     setMessages([]);
@@ -218,6 +236,32 @@ export function useChat() {
     setError(null);
     await setStorage({ messages: [], threadId: null });
   }, []);
+
+  const retryLast = useCallback(async () => {
+    if (isStreaming) return;
+
+    // Find the last user message
+    let lastUserIndex = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "user") {
+        lastUserIndex = i;
+        break;
+      }
+    }
+    if (lastUserIndex === -1) return;
+
+    const lastUserText = messages[lastUserIndex].content;
+
+    // Remove the last user message and all assistant messages after it
+    const trimmed = messages.slice(0, lastUserIndex);
+    setMessages(trimmed);
+    setError(null);
+    await saveState(trimmed, threadId);
+
+    // Resend
+    // Small delay to let state settle before sendMessage reads it
+    setTimeout(() => sendMessage(lastUserText), 50);
+  }, [messages, threadId, isStreaming, saveState, sendMessage]);
 
   return {
     messages,
@@ -227,6 +271,7 @@ export function useChat() {
     sendMessage,
     stopStreaming,
     clearChat,
+    retryLast,
     loadState,
   };
 }
