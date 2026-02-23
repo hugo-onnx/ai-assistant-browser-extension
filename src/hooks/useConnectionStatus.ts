@@ -1,30 +1,29 @@
 import { useState, useEffect, useCallback } from "react";
 import { getSyncStorage } from "../utils/storage";
+import type { ConnectionStatus } from "../types";
 
 const DEFAULT_PROXY_URL = "http://localhost:8000";
-const CHECK_INTERVAL = 30_000; // 30 seconds
+const CHECK_INTERVAL = 30_000;
 
-/**
- * Polls the proxy /health endpoint periodically.
- * Returns: { status: "connected" | "disconnected" | "checking", lastChecked }
- */
-export function useConnectionStatus() {
-  const [status, setStatus] = useState("checking"); // "checking" | "connected" | "disconnected"
-  const [lastChecked, setLastChecked] = useState(null);
+interface UseConnectionStatusReturn {
+  status: ConnectionStatus;
+  lastChecked: Date | null;
+  recheck: () => Promise<void>;
+}
+
+export function useConnectionStatus(): UseConnectionStatusReturn {
+  const [status, setStatus] = useState<ConnectionStatus>("checking");
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
 
   const check = useCallback(async () => {
     try {
       const sync = await getSyncStorage(["proxyUrl"]);
-      const proxyUrl = sync.proxyUrl || DEFAULT_PROXY_URL;
+      const proxyUrl = (sync.proxyUrl as string) || DEFAULT_PROXY_URL;
       const res = await fetch(`${proxyUrl}/health`, {
         method: "GET",
         signal: AbortSignal.timeout(5000),
       });
-      if (res.ok) {
-        setStatus("connected");
-      } else {
-        setStatus("disconnected");
-      }
+      setStatus(res.ok ? "connected" : "disconnected");
     } catch {
       setStatus("disconnected");
     }
@@ -32,7 +31,7 @@ export function useConnectionStatus() {
   }, []);
 
   useEffect(() => {
-    check(); // initial check
+    check();
     const interval = setInterval(check, CHECK_INTERVAL);
     return () => clearInterval(interval);
   }, [check]);
