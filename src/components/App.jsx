@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useChat } from "../hooks/useChat";
+import { useConnectionStatus } from "../hooks/useConnectionStatus";
+import { useTheme } from "../hooks/useTheme";
 import Header from "./Header";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
@@ -13,8 +15,12 @@ export default function App() {
     sendMessage,
     stopStreaming,
     clearChat,
+    retryLast,
     loadState,
   } = useChat();
+
+  const { status: connectionStatus } = useConnectionStatus();
+  const { isDark, toggleTheme } = useTheme();
 
   const messagesEndRef = useRef(null);
 
@@ -28,19 +34,39 @@ export default function App() {
     }
   }, [messages]);
 
+  // Find the index of the last assistant message
+  let lastAssistantIndex = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === "assistant") {
+      lastAssistantIndex = i;
+      break;
+    }
+  }
+
   return (
     <div className="h-full flex flex-col bg-background">
-      <Header onClear={clearChat} hasMessages={messages.length > 0} />
+      <Header
+        onClear={clearChat}
+        hasMessages={messages.length > 0}
+        connectionStatus={connectionStatus}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
+      />
 
       {messages.length === 0 ? (
         <WelcomeScreen onSuggestionClick={sendMessage} />
       ) : (
         <div className="flex-1 overflow-y-auto px-4 py-4">
-          {messages.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} />
+          {messages.map((msg, idx) => (
+            <ChatMessage
+              key={msg.id}
+              message={msg}
+              isLast={idx === lastAssistantIndex}
+              onRetry={retryLast}
+            />
           ))}
 
-          {/* Error notification — Carbon inline notification (error) */}
+          {/* Error notification */}
           {error && (
             <div className="mb-4 px-4 py-3 text-sm bg-layer-01 border-l-[3px] border-support-error text-text-error flex items-start gap-2">
               <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" className="shrink-0 mt-0.5">
