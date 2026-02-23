@@ -1,5 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 
+/* Carbon icons */
+const IconSend = () => (
+  <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+    <path d="M27.45 15.11l-22-11a1 1 0 00-1.08.12 1 1 0 00-.33 1L7 16 4 26.74A1 1 0 005 28a1 1 0 00.45-.11l22-11a1 1 0 000-1.78zM6.82 25.36L9 17h8v-2H9L6.82 6.64 24.32 16z" />
+  </svg>
+);
+const IconStop = () => (
+  <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+    <path d="M16 2a14 14 0 1014 14A14 14 0 0016 2zm0 26a12 12 0 1112-12 12 12 0 01-12 12z" />
+    <path d="M11 11h10v10H11z" />
+  </svg>
+);
+
 export default function ChatInput({ onSend, onStop, isStreaming, disabled }) {
   const [text, setText] = useState("");
   const textareaRef = useRef(null);
@@ -20,9 +33,7 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }) {
     if (!text.trim()) return;
     onSend(text);
     setText("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
   const handleKeyDown = (e) => {
@@ -32,42 +43,37 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }) {
     }
   };
 
+  const hasText = text.trim().length > 0;
+
   return (
-    <div className="border-t border-white/[0.06] bg-surface p-3">
-      <div className="flex items-end gap-2 bg-surface-raised rounded-xl border border-white/[0.08] px-3 py-2 focus-within:border-accent/40 transition-colors">
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Send a message…"
-          disabled={disabled}
-          rows={1}
-          className="flex-1 bg-transparent text-text-primary placeholder-text-secondary text-[13.5px] leading-relaxed resize-none outline-none max-h-[120px] py-0.5"
-        />
+    <div className="border-t border-border-subtle-00 bg-background p-4">
+      {/* Carbon text-area + button combo */}
+      <div className="flex items-end gap-0">
+        <div className="flex-1 bg-layer-01 border-b-2 border-border-strong-01 has-[:focus]:border-interactive has-[:focus]:outline has-[:focus]:outline-2 has-[:focus]:outline-focus has-[:focus]:-outline-offset-2 transition-colors h-[42px] flex items-center">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message…"
+            disabled={disabled}
+            rows={1}
+            className="w-full bg-transparent text-text-primary placeholder-text-placeholder text-[15px] leading-relaxed resize-none outline-none px-4 max-h-[120px] focus:outline-none"
+          />
+        </div>
         <button
           onClick={handleSubmit}
-          disabled={disabled || (!isStreaming && !text.trim())}
-          className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+          disabled={disabled || (!isStreaming && !hasText)}
+          className={`shrink-0 w-[42px] h-[42px] flex items-center justify-center transition-colors ${
             isStreaming
-              ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-              : text.trim()
-              ? "bg-accent text-white hover:bg-accent-hover"
-              : "bg-white/[0.06] text-text-secondary"
-          } disabled:opacity-30 disabled:cursor-not-allowed`}
-          title={isStreaming ? "Stop generating" : "Send message"}
+              ? "bg-button-danger text-text-on-color hover:opacity-90"
+              : hasText
+              ? "bg-button-primary text-text-on-color hover:bg-button-primary-hover active:bg-button-primary-active"
+              : "bg-layer-01 text-text-disabled cursor-not-allowed"
+          }`}
+          title={isStreaming ? "Stop" : "Send"}
         >
-          {isStreaming ? (
-            // Stop icon
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-              <rect x="2" y="2" width="10" height="10" rx="1.5" />
-            </svg>
-          ) : (
-            // Send arrow icon
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M8 12V4M8 4L4 8M8 4l4 4" />
-            </svg>
-          )}
+          {isStreaming ? <IconStop /> : <IconSend />}
         </button>
       </div>
     </div>
