@@ -1,4 +1,4 @@
-import { Marked } from "marked";
+import { Marked, type Tokens } from "marked";
 import hljs from "highlight.js/lib/core";
 
 import javascript from "highlight.js/lib/languages/javascript";
@@ -25,16 +25,14 @@ hljs.registerLanguage("yaml", yaml);
 hljs.registerLanguage("typescript", typescript);
 hljs.registerLanguage("ts", typescript);
 
-// Build marked instance — skip marked-highlight to avoid version conflicts.
-// Use a custom renderer for code blocks instead.
 const marked = new Marked();
 
 marked.use({
   breaks: true,
   gfm: true,
   renderer: {
-    code({ text, lang }) {
-      let highlighted;
+    code({ text, lang }: Tokens.Code): string {
+      let highlighted: string;
       try {
         if (lang && hljs.getLanguage(lang)) {
           highlighted = hljs.highlight(text, { language: lang }).value;
@@ -47,14 +45,12 @@ marked.use({
       const langClass = lang ? ` language-${lang}` : "";
       return `<pre><code class="hljs${langClass}">${highlighted}</code></pre>`;
     },
-    table({ header, rows }) {
-      // Wrap table in scrollable container
+    table({ header, rows }: Tokens.Table): string {
       let html = "<table><thead>";
       if (header && header.length > 0) {
         html += "<tr>";
         for (const cell of header) {
           const align = cell.align ? ` style="text-align:${cell.align}"` : "";
-          // Use cell.text — header cells are typically plain text
           html += `<th${align}>${cell.text}</th>`;
         }
         html += "</tr>";
@@ -65,8 +61,7 @@ marked.use({
           html += "<tr>";
           for (const cell of row) {
             const align = cell.align ? ` style="text-align:${cell.align}"` : "";
-            // Render inline markdown in cell (handles **bold**, `code`, links, etc.)
-            const content = marked.parseInline(cell.text || "");
+            const content = marked.parseInline(cell.text || "") as string;
             html += `<td${align}>${content}</td>`;
           }
           html += "</tr>";
@@ -78,10 +73,10 @@ marked.use({
   },
 });
 
-export function renderMarkdown(text) {
+export function renderMarkdown(text: string): string {
   if (!text) return "";
   try {
-    return marked.parse(text);
+    return marked.parse(text) as string;
   } catch {
     return text;
   }
