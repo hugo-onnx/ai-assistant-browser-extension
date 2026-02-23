@@ -1,8 +1,6 @@
-/* ── IBM Carbon Design System – g100/g10 switchable theme ── */
 @import "tailwindcss";
 @import "highlight.js/styles/github-dark.min.css";
 
-/* ── Tailwind @theme: register CSS variable names for utility class generation ── */
 @theme {
   --color-background: var(--carbon-background);
   --color-background-hover: var(--carbon-background-hover);
@@ -54,7 +52,6 @@
   --font-mono: "IBM Plex Mono", "Menlo", "DejaVu Sans Mono", monospace;
 }
 
-/* ── Carbon g100 (dark) ── */
 :root,
 [data-theme="g100"] {
   --carbon-background: #161616;
@@ -105,7 +102,6 @@
   --carbon-code-block-bg: #262626;
 }
 
-/* ── Carbon g10 (light) ── */
 [data-theme="g10"] {
   --carbon-background: #f4f4f4;
   --carbon-background-hover: #e8e8e8;
@@ -155,7 +151,6 @@
   --carbon-code-block-bg: #ffffff;
 }
 
-/* ── Base ── */
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -170,13 +165,11 @@ html, body, #root {
   transition: background 0.2s, color 0.2s;
 }
 
-/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border-subtle-01); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-border-strong-01); }
 
-/* ── Focus ring ── */
 *:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: -2px;
@@ -186,7 +179,6 @@ input:focus-visible {
   outline: none;
 }
 
-/* ── Markdown ── */
 .markdown-content {
   line-height: 1.5;
   font-size: 15px;
@@ -198,7 +190,6 @@ input:focus-visible {
 .markdown-content ul, .markdown-content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
 .markdown-content li { margin: 0.25rem 0; }
 
-/* Inline code */
 .markdown-content code {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -211,7 +202,6 @@ input:focus-visible {
   border: 1px solid var(--color-border-subtle-00);
 }
 
-/* Code block */
 .markdown-content pre {
   margin: 0.75rem 0;
   border-radius: 0;
@@ -230,7 +220,6 @@ input:focus-visible {
   letter-spacing: 0.32px;
 }
 
-/* Headings */
 .markdown-content h1, .markdown-content h2, .markdown-content h3 {
   font-weight: 600;
   color: var(--color-text-primary);
@@ -241,11 +230,9 @@ input:focus-visible {
 .markdown-content h3 { font-size: 14px; line-height: 1.28; margin: 0.5rem 0 0.25rem; }
 .markdown-content strong { font-weight: 600; color: var(--color-text-primary); }
 
-/* Links */
 .markdown-content a { color: var(--color-link-primary); text-decoration: none; }
 .markdown-content a:hover { color: var(--color-link-primary-hover); text-decoration: underline; }
 
-/* Blockquote */
 .markdown-content blockquote {
   border-left: 3px solid var(--color-border-subtle-01);
   margin: 0.5rem 0;
@@ -253,7 +240,6 @@ input:focus-visible {
   color: var(--color-text-secondary);
 }
 
-/* ── Tables (Carbon DataTable) ── */
 .markdown-content table {
   width: 100%;
   border-collapse: collapse;
@@ -295,7 +281,6 @@ input:focus-visible {
 .markdown-content td:empty::after { content: "—"; color: var(--color-text-placeholder); }
 .markdown-content .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-/* ── Typing Cursor ── */
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 .typing-cursor::after {
   content: "▊";
@@ -305,7 +290,6 @@ input:focus-visible {
   margin-left: 1px;
 }
 
-/* ── Light theme: override highlight.js for code readability ── */
 [data-theme="g10"] .hljs {
   background: var(--color-code-block-bg) !important;
   color: #161616 !important;
