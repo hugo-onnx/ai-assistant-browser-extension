@@ -28,8 +28,8 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 └──────────────────┬────────────────────────────┘
                    │ POST /chat/stream (SSE)
                    ▼
-┌──────────────────────────────────────────────┐
-│            FastAPI Proxy Server                │
+┌───────────────────────────────────────────────┐
+│            FastAPI Proxy Server               │
 │                                               │
 │  Endpoints:                                   │
 │   ├── POST /chat/stream (SSE)                 │
@@ -41,7 +41,7 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 │   ├── SSE stream parsing & forwarding         │
 │   ├── Async flow detection & polling          │
 │   └── Thread message polling (up to 10 min)   │
-└──────────────────┬───────────────────────────┘
+└──────────────────┬────────────────────────────┘
                    │ POST /v1/orchestrate/runs?stream=true
                    │ GET  /v1/orchestrate/threads/{id}/messages
                    ▼
