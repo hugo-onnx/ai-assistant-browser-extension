@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import { renderMarkdown } from "../utils/markdown";
+import type { ChatMessage as ChatMessageType } from "../types";
 
-/* Carbon icons (14px) */
 const IconCopy = () => (
   <svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor">
     <path d="M28 10v18H10V10h18m0-2H10a2 2 0 00-2 2v18a2 2 0 002 2h18a2 2 0 002-2V10a2 2 0 00-2-2z" />
@@ -15,18 +15,16 @@ const IconCheckmark = () => (
 );
 const IconRetry = () => (
   <svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor">
-    <path d="M25.59 8.41A14 14 0 118.41 25.59" opacity="0" />
     <path d="M18 28A12 12 0 106 16H2l6 6 6-6h-4a8 8 0 118 8z" />
   </svg>
 );
 
-/* Format timestamp to relative or short time */
-function formatTime(isoString) {
+function formatTime(isoString: string): string {
   if (!isoString) return "";
   try {
     const date = new Date(isoString);
     const now = new Date();
-    const diffMs = now - date;
+    const diffMs = now.getTime() - date.getTime();
     const diffMin = Math.floor(diffMs / 60000);
 
     if (diffMin < 1) return "Just now";
@@ -35,7 +33,6 @@ function formatTime(isoString) {
     const diffHours = Math.floor(diffMin / 60);
     if (diffHours < 24) return `${diffHours}h ago`;
 
-    // Same year — show month/day + time
     const sameYear = date.getFullYear() === now.getFullYear();
     if (sameYear) {
       return date.toLocaleDateString(undefined, {
@@ -45,7 +42,6 @@ function formatTime(isoString) {
         minute: "2-digit",
       });
     }
-    // Different year
     return date.toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
@@ -65,7 +61,7 @@ const AiAvatar = () => (
   </div>
 );
 
-function CopyButton({ text }) {
+function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -102,7 +98,7 @@ function CopyButton({ text }) {
   );
 }
 
-function RetryButton({ onClick }) {
+function RetryButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -115,7 +111,7 @@ function RetryButton({ onClick }) {
   );
 }
 
-function Timestamp({ iso }) {
+function Timestamp({ iso }: { iso: string }) {
   const text = formatTime(iso);
   if (!text) return null;
   return (
@@ -125,7 +121,7 @@ function Timestamp({ iso }) {
   );
 }
 
-function UserMessage({ content, timestamp }) {
+function UserMessage({ content, timestamp }: { content: string; timestamp: string }) {
   return (
     <div className="flex flex-col items-end mb-4">
       <div
@@ -141,6 +137,16 @@ function UserMessage({ content, timestamp }) {
   );
 }
 
+interface AssistantMessageProps {
+  content: string;
+  isStreaming?: boolean;
+  isError?: boolean;
+  statusText?: string;
+  timestamp: string;
+  isLast: boolean;
+  onRetry?: () => void;
+}
+
 function AssistantMessage({
   content,
   isStreaming,
@@ -149,7 +155,7 @@ function AssistantMessage({
   timestamp,
   isLast,
   onRetry,
-}) {
+}: AssistantMessageProps) {
   const html = useMemo(() => renderMarkdown(content), [content]);
 
   return (
@@ -157,12 +163,10 @@ function AssistantMessage({
       <div className="flex gap-3 max-w-[95%]">
         <AiAvatar />
         <div className="flex-1 min-w-0">
-          {/* AI label + timestamp */}
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs text-text-helper font-medium">AI</span>
             {!isStreaming && <Timestamp iso={timestamp} />}
           </div>
-          {/* Content tile */}
           <div
             className={`bg-layer-01 rounded-lg px-4 py-3 ${
               isError ? "border border-support-error" : ""
@@ -183,7 +187,6 @@ function AssistantMessage({
               </div>
             ) : null}
 
-            {/* Flow processing status */}
             {statusText && isStreaming && (
               <div className="mt-3 pt-3 border-t border-border-subtle-00 text-xs text-text-helper flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-interactive animate-pulse" />
@@ -192,7 +195,6 @@ function AssistantMessage({
             )}
           </div>
 
-          {/* Action bar — visible on hover, hidden while streaming */}
           {content && !isStreaming && (
             <div className="mt-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <CopyButton text={content} />
@@ -205,7 +207,13 @@ function AssistantMessage({
   );
 }
 
-export default function ChatMessage({ message, isLast, onRetry }) {
+interface ChatMessageProps {
+  message: ChatMessageType;
+  isLast: boolean;
+  onRetry: () => void;
+}
+
+export default function ChatMessage({ message, isLast, onRetry }: ChatMessageProps) {
   if (message.role === "user") {
     return <UserMessage content={message.content} timestamp={message.timestamp} />;
   }
