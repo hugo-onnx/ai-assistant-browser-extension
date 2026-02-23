@@ -1,46 +1,53 @@
+/* Carbon icon: 16px SVGs matching @carbon/icons */
+const IconAdd = () => (
+  <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+    <path d="M17 15V8h-2v7H8v2h7v7h2v-7h7v-2z" />
+  </svg>
+);
+const IconSettings = () => (
+  <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+    <path d="M27 16.76v-1.53l1.92-1.68A2 2 0 0029.3 11l-2.36-4a2 2 0 00-1.73-1 2 2 0 00-.64.1l-2.43.82a11.35 11.35 0 00-1.31-.75l-.51-2.52a2 2 0 00-2-1.61h-4.68a2 2 0 00-2 1.61l-.51 2.52a11.48 11.48 0 00-1.32.75L7.43 6.09A2 2 0 006.79 6a2 2 0 00-1.73 1L2.7 11a2 2 0 00.38 2.55l1.92 1.68v1.53l-1.92 1.68A2 2 0 002.7 21l2.36 4a2 2 0 001.73 1 2 2 0 00.64-.1l2.43-.82a11.35 11.35 0 001.31.75l.51 2.52a2 2 0 002 1.61h4.68a2 2 0 002-1.61l.51-2.52a11.48 11.48 0 001.32-.75l2.42.82a2 2 0 00.64.1 2 2 0 001.73-1l2.28-4a2 2 0 00-.38-2.55zM16 22a6 6 0 116-6 5.94 5.94 0 01-6 6z" />
+  </svg>
+);
+
 export default function Header({ onClear, hasMessages }) {
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-surface">
-      {/* Logo + Title */}
-      <div className="flex items-center gap-2.5">
-        <div className="w-7 h-7 rounded-lg bg-ibm-blue flex items-center justify-center">
-          <span className="text-[10px] font-bold text-white tracking-tighter">wx</span>
+    <header
+      className="flex items-center justify-between h-12 px-4 bg-background border-b border-border-subtle-00"
+      style={{ minHeight: "48px" }} /* Carbon header height */
+    >
+      {/* Product name (Carbon UI Shell pattern) */}
+      <div className="flex items-center gap-3">
+        <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: "#0f62fe" }}>
+          <span className="text-[9px] font-bold text-white leading-none">wx</span>
         </div>
-        <div>
-          <h1 className="text-[13px] font-semibold text-text-primary leading-tight">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-sm font-semibold text-text-primary leading-none">
             watsonx Orchestrate
-          </h1>
-          <p className="text-[10.5px] text-text-secondary leading-tight">
-            AI Assistant
-          </p>
+          </span>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1">
+      {/* Header actions — Carbon icon buttons (ghost variant) */}
+      <div className="flex items-center">
         {hasMessages && (
           <button
             onClick={onClear}
-            className="p-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-background-hover active:bg-background-active transition-colors"
             title="New conversation"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M2 2h12M5.5 5.5l5 5M10.5 5.5l-5 5" />
-            </svg>
+            <IconAdd />
           </button>
         )}
         <a
           href="options.html"
           target="_blank"
-          className="p-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/[0.06] transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-background-hover active:bg-background-active transition-colors"
           title="Settings"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <circle cx="8" cy="8" r="2.5" />
-            <path d="M13 8a5 5 0 01-.5 2.1l1.2 1.2-1.4 1.4-1.2-1.2A5 5 0 018 13a5 5 0 01-2.1-.5l-1.2 1.2-1.4-1.4 1.2-1.2A5 5 0 013 8a5 5 0 01.5-2.1L2.3 4.7l1.4-1.4 1.2 1.2A5 5 0 018 3a5 5 0 012.1.5l1.2-1.2 1.4 1.4-1.2 1.2A5 5 0 0113 8z" />
-          </svg>
+          <IconSettings />
         </a>
       </div>
-    </div>
+    </header>
   );
 }
