@@ -22,7 +22,7 @@ export default function App() {
   const { status: connectionStatus } = useConnectionStatus();
   const { isDark, toggleTheme } = useTheme();
 
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadState();
@@ -34,7 +34,6 @@ export default function App() {
     }
   }, [messages]);
 
-  // Find the index of the last assistant message
   let lastAssistantIndex = -1;
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === "assistant") {
@@ -66,7 +65,6 @@ export default function App() {
             />
           ))}
 
-          {/* Error notification */}
           {error && (
             <div className="mb-4 px-4 py-3 text-sm bg-layer-01 border-l-[3px] border-support-error text-text-error flex items-start gap-2">
               <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" className="shrink-0 mt-0.5">
