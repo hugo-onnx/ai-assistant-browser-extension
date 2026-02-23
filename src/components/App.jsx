@@ -18,12 +18,10 @@ export default function App() {
 
   const messagesEndRef = useRef(null);
 
-  // Load saved state on mount
   useEffect(() => {
     loadState();
   }, [loadState]);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -31,20 +29,25 @@ export default function App() {
   }, [messages]);
 
   return (
-    <div className="h-full flex flex-col bg-surface">
+    <div className="h-full flex flex-col bg-background">
       <Header onClear={clearChat} hasMessages={messages.length > 0} />
 
       {messages.length === 0 ? (
         <WelcomeScreen onSuggestionClick={sendMessage} />
       ) : (
-        <div className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4">
           {messages.map((msg) => (
             <ChatMessage key={msg.id} message={msg} />
           ))}
 
+          {/* Error notification — Carbon inline notification (error) */}
           {error && (
-            <div className="mx-2 mb-3 text-[12px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-              {error}
+            <div className="mb-4 px-4 py-3 text-sm bg-layer-01 border-l-[3px] border-support-error text-text-error flex items-start gap-2">
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" className="shrink-0 mt-0.5">
+                <path d="M16 2a14 14 0 1014 14A14 14 0 0016 2zm0 26a12 12 0 1112-12 12 12 0 01-12 12z" />
+                <path d="M15 8h2v11h-2zM16 22a1.5 1.5 0 101.5 1.5A1.5 1.5 0 0016 22z" />
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
