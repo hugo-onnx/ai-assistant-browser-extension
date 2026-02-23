@@ -1,10 +1,23 @@
 import { useMemo } from "react";
 import { renderMarkdown } from "../utils/markdown";
 
+/* Carbon icon: Watson/AI avatar */
+const AiAvatar = () => (
+  <div
+    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+    style={{ background: "var(--color-button-primary)" }}
+  >
+    <span className="text-[10px] font-bold text-white tracking-tight">wx</span>
+  </div>
+);
+
 function UserMessage({ content }) {
   return (
-    <div className="flex justify-end mb-3">
-      <div className="max-w-[85%] bg-ibm-blue text-white rounded-2xl rounded-br-md px-4 py-2.5 text-[13.5px] leading-relaxed">
+    <div className="flex justify-end mb-4">
+      <div
+        className="max-w-[85%] px-4 py-3 text-sm leading-relaxed text-text-on-color rounded-tl-lg rounded-tr-lg rounded-bl-lg"
+        style={{ background: "var(--color-button-primary)" }}
+      >
         {content}
       </div>
     </div>
@@ -15,39 +28,43 @@ function AssistantMessage({ content, isStreaming, isError, statusText }) {
   const html = useMemo(() => renderMarkdown(content), [content]);
 
   return (
-    <div className="flex justify-start mb-3">
-      <div className="flex gap-2.5 max-w-[92%]">
-        {/* Avatar */}
-        <div className="shrink-0 w-6 h-6 rounded-full bg-ibm-blue-dark flex items-center justify-center mt-0.5">
-          <span className="text-[10px] font-semibold text-white tracking-tight">wx</span>
-        </div>
-        {/* Bubble */}
-        <div
-          className={`bg-surface-raised rounded-2xl rounded-tl-md px-4 py-2.5 border border-white/[0.06] ${
-            isError ? "border-red-500/30" : ""
-          }`}
-        >
-          {content ? (
-            <div
-              className={`markdown-content text-text-primary ${
-                isStreaming ? "typing-cursor" : ""
-              }`}
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-          ) : isStreaming ? (
-            <div className="flex gap-1 py-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-text-secondary animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-text-secondary animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-text-secondary animate-bounce" style={{ animationDelay: "300ms" }} />
-            </div>
-          ) : null}
-          {/* Status text for flow processing */}
-          {statusText && isStreaming && (
-            <div className="mt-2 pt-2 border-t border-white/[0.06] text-[11.5px] text-text-secondary flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-              {statusText}
-            </div>
-          )}
+    <div className="flex justify-start mb-4">
+      <div className="flex gap-3 max-w-[95%]">
+        <AiAvatar />
+        <div className="flex-1 min-w-0">
+          {/* Carbon AI label */}
+          <span className="text-xs text-text-helper mb-1 block font-medium">
+            AI
+          </span>
+          {/* Content tile */}
+          <div
+            className={`bg-layer-01 rounded-lg px-4 py-3 ${
+              isError ? "border border-support-error" : ""
+            }`}
+          >
+            {content ? (
+              <div
+                className={`markdown-content text-text-primary ${
+                  isStreaming ? "typing-cursor" : ""
+                }`}
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            ) : isStreaming ? (
+              <div className="flex gap-1.5 py-1">
+                <span className="w-2 h-2 rounded-full bg-interactive animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-2 h-2 rounded-full bg-interactive animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-2 h-2 rounded-full bg-interactive animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
+            ) : null}
+
+            {/* Flow processing status — Carbon inline notification style */}
+            {statusText && isStreaming && (
+              <div className="mt-3 pt-3 border-t border-border-subtle-00 text-xs text-text-helper flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-interactive animate-pulse" />
+                {statusText}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
