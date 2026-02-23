@@ -90,7 +90,6 @@ async def _poll_thread_messages(
 
                 data = resp.json()
 
-                # Extract messages list
                 if isinstance(data, list):
                     messages = data
                 elif isinstance(data, dict):
@@ -100,15 +99,19 @@ async def _poll_thread_messages(
                 else:
                     messages = []
 
-                # Log summary of all messages
                 msg_summary = [
                     {"id": m.get("id", "?")[:12], "role": m.get("role", "?"), "text": (m.get("content", [{}])[0].get("text", "") if m.get("content") else "")[:80]}
                     for m in messages if isinstance(m, dict)
                 ]
-                # Log summary — verbose on first poll and when count changes, quiet otherwise
                 if initial_msg_count is None:
                     initial_msg_count = len(messages)
-                    logger.info("Poll [%ds]: %d messages — %s", elapsed, len(messages), json.dumps(msg_summary))
+                    for msg in messages:
+                        if isinstance(msg, dict):
+                            mid = msg.get("id", msg.get("message_id", ""))
+                            if mid:
+                                known_message_ids.add(mid)
+                    logger.info("Poll [%ds]: %d messages (all marked known) — %s", elapsed, len(messages), json.dumps(msg_summary))
+                    continue
                 elif len(messages) != initial_msg_count:
                     logger.info("Poll [%ds]: %d messages (was %d) — %s", elapsed, len(messages), initial_msg_count, json.dumps(msg_summary))
                 elif elapsed % 60 < interval:
@@ -247,7 +250,6 @@ async def _stream_response(request: ChatRequest) -> AsyncGenerator[dict, None]:
                             known_message_ids.add(msg_id)
 
                     elif event_type == "message.started":
-                        # Track the user message ID too
                         msg_id = data.get("message_id", "")
                         if msg_id:
                             known_message_ids.add(msg_id)
@@ -271,7 +273,6 @@ async def _stream_response(request: ChatRequest) -> AsyncGenerator[dict, None]:
 
     logger.info("Stream ended. is_flow=%s, thread=%s, known_msgs=%s", is_flow, thread_id, known_message_ids)
 
-    # If a flow was detected, poll for the result
     if is_flow and thread_id:
         async for event in _poll_thread_messages(
             thread_id=thread_id,
