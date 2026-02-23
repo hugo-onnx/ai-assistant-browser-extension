@@ -11,42 +11,43 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 ## Architecture
 
 ```
-┌───────────────────────────────────────────────┐
-│            Chrome Extension (Side Panel)      │
-│                                               │
-│  React + Vite + Tailwind CSS                  │
-│  IBM Carbon Design System                     │
-│                                               │
-│  Components:                                  │
-│   ├── Header (UI Shell)                       │
-│   ├── WelcomeScreen (Clickable Tiles)         │
-│   ├── ChatMessage (User/AI bubbles)           │
-│   └── ChatInput (Text input + Send button)    │
-│                                               │
-│  Hooks:                                       │
-│   └── useChat (SSE streaming, state mgmt)     │
-└──────────────────┬────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│            Chrome Extension (Side Panel)     │
+│                                              │
+│  React + Vite + Tailwind CSS v4              │
+│  IBM Carbon Design System (g100 theme)       │
+│                                              │
+│  Components:                                 │
+│   ├── Header (UI Shell)                      │
+│   ├── WelcomeScreen (Clickable Tiles)        │
+│   ├── ChatMessage (User/AI bubbles)          │
+│   └── ChatInput (Text input + Send button)   │
+│                                              │
+│  Hooks:                                      │
+│   └── useChat (SSE streaming, state mgmt)    │
+└──────────────────┬───────────────────────────┘
                    │ POST /chat/stream (SSE)
                    ▼
-┌───────────────────────────────────────────────┐
-│            FastAPI Proxy Server               │
-│                                               │
-│  Endpoints:                                   │
-│   ├── POST /chat/stream (SSE)                 │
-│   ├── GET  /health                            │
-│   └── GET  /docs (Swagger)                    │
-│                                               │
-│  Features:                                    │
-│   ├── IAM token caching & auto-refresh        │
-│   ├── SSE stream parsing & forwarding         │
-│   ├── Async flow detection & polling          │
-│   └── Thread message polling (up to 10 min)   │
-└──────────────────┬────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│            FastAPI Proxy Server              │
+│                                              │
+│  Endpoints:                                  │
+│   ├── POST /chat/stream (SSE)                │
+│   ├── GET  /health                           │
+│   └── GET  /docs (Swagger)                   │
+│                                              │
+│  Features:                                   │
+│   ├── IAM token caching & auto-refresh       │
+│   ├── SSE stream parsing & forwarding        │
+│   ├── Async flow detection & polling         │
+│   └── Thread message polling (up to 10 min)  │
+└──────────────────┬───────────────────────────┘
                    │ POST /v1/orchestrate/runs?stream=true
                    │ GET  /v1/orchestrate/threads/{id}/messages
                    ▼
 ┌──────────────────────────────────────────────┐
 │       IBM watsonx Orchestrate API            │
+│       (eu-de / us-south / etc.)              │
 └──────────────────────────────────────────────┘
 ```
 
@@ -67,9 +68,11 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 - **Result delivery** — Flow results appear as a new message bubble when complete
 
 ### Design
-- **IBM Carbon Design System** — g100 dark theme with official color tokens
+- **IBM Carbon Design System** — g100 (dark) and g10 (light) themes with official color tokens
+- **Dark/light toggle** — Switch themes from the header; preference persists across sessions
 - **IBM Plex fonts** — IBM Plex Sans and IBM Plex Mono
 - **Carbon patterns** — UI Shell header, DataTable, clickable tiles, inline notifications, form inputs, icon buttons
+- **Connection status** — Live indicator dot in the header showing proxy availability
 - **Responsive** — Works in Chrome's side panel (narrow) and standalone (dev mode)
 
 ---
@@ -81,38 +84,45 @@ wxo-extension/                    # Chrome Extension (Frontend)
 ├── sidepanel.html                # Side panel entry point
 ├── options.html                  # Settings page entry point
 ├── package.json                  # Dependencies
+├── tsconfig.json                 # TypeScript configuration
 ├── vite.config.js                # Vite build config (multi-page)
 ├── public/
 │   ├── manifest.json             # Chrome Extension Manifest V3
 │   ├── background.js             # Service worker (side panel behavior)
 │   └── icons/                    # Extension icons (16, 48, 128px)
-├── src/
-│    ├── index.css                # Carbon g100 theme tokens + markdown styles
-│    ├── sidepanel.jsx            # React mount for side panel
-│    ├── options.jsx              # Settings page (proxy URL config)
-│    ├── components/
-│    │   ├── App.jsx              # Main layout (header + chat + input)
-│    │   ├── Header.jsx           # Carbon UI Shell header bar
-│    │   ├── ChatMessage.jsx      # User & assistant message bubbles
-│    │   ├── ChatInput.jsx        # Text input + send/stop button
-│    │   └── WelcomeScreen.jsx    # Landing screen with suggestion tiles
-│    ├── hooks/
-│    │   └── useChat.js           # Chat state, SSE streaming, flow events
-│    └── utils/
-│        ├── markdown.js          # Marked + highlight.js renderer
-│        └── storage.js           # chrome.storage abstraction
-│
-└── proxy-server/                 # FastAPI Proxy Server (Backend)
-    ├── pyproject.toml            # Project metadata & dependencies
-    ├── uv.lock                   # Locked dependency versions                       
-    ├── .env.example              # Environment variables
-    └── app/
-        ├── main.py                # FastAPI app, CORS, lifespan
-        ├── config.py              # Pydantic settings from .env
-        ├── auth.py                # IAM token manager (cache + refresh)
-        ├── models.py              # Request/response Pydantic models
-        └── routes/
-            └── chat.py             # /chat/stream endpoint + flow polling
+└── src/
+    ├── types.ts                  # Shared TypeScript interfaces
+    ├── vite-env.d.ts             # Vite type declarations
+    ├── index.css                 # Carbon g100/g10 theme tokens + markdown styles
+    ├── sidepanel.tsx             # React mount for side panel
+    ├── options.tsx               # Settings page (proxy URL config)
+    ├── components/
+    │   ├── App.tsx               # Main layout (header + chat + input)
+    │   ├── Header.tsx            # Carbon UI Shell header bar + theme toggle
+    │   ├── ChatMessage.tsx       # User/AI bubbles, copy, retry, timestamps
+    │   ├── ChatInput.tsx         # Text input + send/stop button
+    │   └── WelcomeScreen.tsx     # Landing screen with suggestion tiles
+    ├── hooks/
+    │   ├── useChat.ts            # Chat state, SSE streaming, flow events
+    │   ├── useConnectionStatus.ts # Proxy health polling
+    │   └── useTheme.ts           # Dark/light theme toggle (g100/g10)
+    └── utils/
+        ├── markdown.ts           # Marked + highlight.js renderer
+        └── storage.ts            # chrome.storage abstraction
+
+proxy-server/                     # FastAPI Proxy Server (Backend)
+├── pyproject.toml                # Project metadata & dependencies
+├── uv.lock                       # Locked dependency versions
+├── .env                          # Environment variables (create this)
+└── app/
+    ├── __init__.py
+    ├── main.py                   # FastAPI app, CORS, lifespan
+    ├── config.py                 # Pydantic settings from .env
+    ├── auth.py                   # IAM token manager (cache + refresh)
+    ├── models.py                 # Request/response Pydantic models
+    └── routes/
+        ├── __init__.py
+        └── chat.py               # /chat/stream endpoint + flow polling
 ```
 
 ---
@@ -266,7 +276,7 @@ Health check endpoint.
 
 ### Async Flows
 
-Some operations (e.g., "create data export jobs") trigger long-running background flows:
+Some watsonx operations (e.g., create data export jobs) trigger long-running background flows:
 
 1. watsonx immediately returns a "A new flow has started…" message, then closes the stream
 2. Proxy detects the flow indicator text
@@ -295,10 +305,11 @@ Tokens are valid for ~1 hour. The proxy handles refresh transparently.
 
 | Technology | Version | Purpose |
 |---|---|---|
+| TypeScript | 5.7 | Type-safe development |
 | React | 19 | UI framework |
 | Vite | 6 | Build tool with HMR |
 | Tailwind CSS | 4 | Utility-first CSS |
-| IBM Carbon Design | g100 | Dark theme tokens, typography, spacing |
+| IBM Carbon Design | g100/g10 | Dark & light theme tokens, typography, spacing |
 | IBM Plex Sans/Mono | — | Official IBM typeface |
 | Marked | 15 | Markdown to HTML |
 | highlight.js | 11 | Code syntax highlighting |
@@ -325,7 +336,13 @@ cd wxo-extension
 npm run dev
 ```
 
-Open `http://localhost:5173/sidepanel.html` — changes hot-reload instantly. Note: `chrome.storage` APIs are not available in dev mode; the extension falls back to in-memory storage.
+Open `http://localhost:5173/sidepanel.html` — changes hot-reload instantly. Note: `chrome.storage` APIs are not available in dev mode; the extension falls back to localStorage.
+
+To run type checking separately:
+
+```bash
+npm run typecheck
+```
 
 ### Proxy Dev Mode
 
