@@ -14,7 +14,6 @@ function Options() {
   }, []);
 
   const handleSave = async () => {
-    // Remove trailing slash
     const url = proxyUrl.replace(/\/+$/, "");
     await setSyncStorage({ proxyUrl: url });
     setProxyUrl(url);
@@ -23,50 +22,76 @@ function Options() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-start justify-center pt-16 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-start justify-center pt-16 px-4">
+      <div className="w-full max-w-lg">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-ibm-blue flex items-center justify-center">
-            <span className="text-sm font-bold text-white tracking-tighter">wx</span>
+        <div className="flex items-center gap-4 mb-10">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{ background: "var(--color-button-primary)" }}
+          >
+            <span className="text-sm font-bold text-white tracking-tight">wx</span>
           </div>
           <div>
             <h1 className="text-lg font-semibold text-text-primary">
-              watsonx Chat Settings
+              Settings
             </h1>
-            <p className="text-xs text-text-secondary">
+            <p className="text-sm text-text-secondary">
               Configure your proxy server connection
             </p>
           </div>
         </div>
 
-        {/* Settings card */}
-        <div className="bg-surface-raised border border-white/[0.08] rounded-xl p-5">
-          <label className="block text-[13px] font-medium text-text-primary mb-2">
-            Proxy Server URL
-          </label>
-          <input
-            type="url"
-            value={proxyUrl}
-            onChange={(e) => setProxyUrl(e.target.value)}
-            placeholder="http://localhost:8000"
-            className="w-full bg-surface border border-white/[0.1] rounded-lg px-3 py-2.5 text-[13px] text-text-primary placeholder-text-secondary outline-none focus:border-accent/50 transition-colors"
-          />
-          <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">
-            The URL of your FastAPI proxy server that connects to watsonx
-            Orchestrate. Default: http://localhost:8000
-          </p>
+        {/* Carbon form group */}
+        <div className="bg-layer-01 p-8">
+          {/* Carbon text-input */}
+          <div className="mb-8">
+            <label className="block text-sm font-normal text-text-secondary mb-2">
+              Proxy Server URL
+            </label>
+            <input
+              type="url"
+              value={proxyUrl}
+              onChange={(e) => setProxyUrl(e.target.value)}
+              placeholder="http://localhost:8000"
+              className="w-full bg-layer-01 text-text-primary placeholder-text-placeholder text-base outline-none px-4 h-12 border-b-2 border-border-strong-01 focus:border-interactive transition-colors"
+            />
+            <p className="text-sm text-text-helper mt-3 leading-relaxed">
+              The URL of your FastAPI proxy server that connects to watsonx
+              Orchestrate.
+            </p>
+          </div>
 
+          {/* Carbon primary button */}
           <button
             onClick={handleSave}
-            className="mt-4 w-full bg-accent hover:bg-accent-hover text-white text-[13px] font-medium py-2.5 rounded-lg transition-colors"
+            className="w-full h-14 flex items-center justify-between px-5 text-base font-normal text-text-on-color transition-colors"
+            style={{
+              background: saved
+                ? "var(--color-support-success)"
+                : "var(--color-button-primary)",
+            }}
+            onMouseEnter={(e) =>
+              !saved &&
+              (e.currentTarget.style.background =
+                "var(--color-button-primary-hover)")
+            }
+            onMouseLeave={(e) =>
+              !saved &&
+              (e.currentTarget.style.background =
+                "var(--color-button-primary)")
+            }
           >
-            {saved ? "✓ Saved" : "Save Settings"}
+            <span>{saved ? "Settings saved" : "Save"}</span>
+            {!saved && (
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M18 6l-1.43 1.39L24.15 15H4v2h20.15l-7.58 7.57L18 26l10-10z" />
+              </svg>
+            )}
           </button>
         </div>
 
-        {/* Help */}
-        <p className="text-[11px] text-text-secondary mt-4 text-center">
+        <p className="text-xs text-text-helper mt-4">
           Make sure your proxy server is running before using the chat.
         </p>
       </div>
