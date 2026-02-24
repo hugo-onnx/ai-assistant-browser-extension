@@ -40,14 +40,13 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 │   ├── IAM token caching & auto-refresh       │
 │   ├── SSE stream parsing & forwarding        │
 │   ├── Async flow detection & polling         │
-│   └── Thread message polling (up to 10 min)  │
+│   └── Thread message polling                 │
 └──────────────────┬───────────────────────────┘
                    │ POST /v1/orchestrate/runs?stream=true
                    │ GET  /v1/orchestrate/threads/{id}/messages
                    ▼
 ┌──────────────────────────────────────────────┐
 │       IBM watsonx Orchestrate API            │
-│       (eu-de / us-south / etc.)              │
 └──────────────────────────────────────────────┘
 ```
 
@@ -59,7 +58,6 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 - **Real-time streaming** — Token-by-token display via Server-Sent Events (SSE)
 - **Markdown rendering** — Tables, code blocks with syntax highlighting, lists, blockquotes
 - **Thread persistence** — Conversations are saved to `chrome.storage.local`
-- **Conversation management** — Start new conversations, auto-scroll
 
 ### Async Flow Support
 - **Flow detection** — Automatically detects when watsonx triggers a long-running flow
@@ -113,6 +111,8 @@ wxo-extension/                    # Chrome Extension (Frontend)
 proxy-server/                     # FastAPI Proxy Server (Backend)
 ├── pyproject.toml                # Project metadata & dependencies
 ├── uv.lock                       # Locked dependency versions
+├── Dockerfile                    # Container image (OpenShift-compatible)
+├── .dockerignore                 # Files excluded from image
 ├── .env                          # Environment variables (create this)
 └── app/
     ├── __init__.py
@@ -135,6 +135,7 @@ proxy-server/                     # FastAPI Proxy Server (Backend)
 - **[uv](https://github.com/astral-sh/uv)** ≥ 0.5 (Python package manager)
 - **Python** ≥ 3.11 (managed by uv)
 - **Google Chrome** ≥ 116 (Side Panel API support)
+- **Docker** or **Podman** (for containerized deployment)
 - **IBM Cloud** account with watsonx Orchestrate instance
 
 ### 1. Proxy Server
@@ -276,7 +277,7 @@ Health check endpoint.
 
 ### Async Flows
 
-Some watsonx operations (e.g., create data export jobs) trigger long-running background flows:
+Some watsonx operations (e.g., create data exports) trigger long-running background flows:
 
 1. watsonx immediately returns a "A new flow has started…" message, then closes the stream
 2. Proxy detects the flow indicator text
@@ -361,6 +362,25 @@ npm run build
 ```
 
 The `dist/` folder contains the production Chrome extension. Load it as an unpacked extension or package it as a `.crx` file.
+
+### Docker
+
+Build and run the proxy server as a container:
+
+```bash
+cd proxy-server
+docker build -t proxy-server .
+docker run -p 8000:8000 --env-file .env proxy-server
+```
+
+Or with Podman:
+
+```bash
+podman build -t proxy-server .
+podman run -p 8000:8000 --env-file .env proxy-server
+```
+
+The image is based on `ghcr.io/astral-sh/uv:python3.13-bookworm-slim`. It runs as a non-root user and is compatible with OpenShift's arbitrary UID policy.
 
 ---
 
