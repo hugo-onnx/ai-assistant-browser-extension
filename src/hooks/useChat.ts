@@ -7,7 +7,6 @@ const DEFAULT_PROXY_URL = "http://localhost:8000";
 interface UseChatReturn {
   messages: ChatMessage[];
   isStreaming: boolean;
-  threadId: string | null;
   error: string | null;
   sendMessage: (text: string) => Promise<void>;
   stopStreaming: () => void;
@@ -19,18 +18,16 @@ interface UseChatReturn {
 export function useChat(): UseChatReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [threadId, setThreadId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const loadState = useCallback(async () => {
-    const local = await getStorage(["messages", "threadId"]);
+    const local = await getStorage(["messages"]);
     if (local.messages) setMessages(local.messages as ChatMessage[]);
-    if (local.threadId) setThreadId(local.threadId as string);
   }, []);
 
-  const saveState = useCallback(async (msgs: ChatMessage[], tid: string | null) => {
-    await setStorage({ messages: msgs, threadId: tid });
+  const saveState = useCallback(async (msgs: ChatMessage[]) => {
+    await setStorage({ messages: msgs });
   }, []);
 
   const getProxyUrl = useCallback(async (): Promise<string> => {
@@ -67,14 +64,17 @@ export function useChat(): UseChatReturn {
       const controller = new AbortController();
       abortRef.current = controller;
 
+      // Build conversation history excluding the placeholder assistant message
+      const historyMessages = [...messages, userMessage].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
       try {
         const response = await fetch(`${proxyUrl}/chat/stream`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: text.trim(),
-            thread_id: threadId,
-          }),
+          body: JSON.stringify({ messages: historyMessages }),
           signal: controller.signal,
         });
 
@@ -85,7 +85,6 @@ export function useChat(): UseChatReturn {
         const reader = response.body!.getReader();
         const decoder = new TextDecoder();
         let fullText = "";
-        let newThreadId = threadId;
         let buffer = "";
 
         while (true) {
@@ -117,24 +116,7 @@ export function useChat(): UseChatReturn {
                   }
                   return updated;
                 });
-              } else if (event.event === "new_message") {
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  const last = updated[updated.length - 1];
-                  if (last && last.role === "assistant") {
-                    updated[updated.length - 1] = { ...last, isStreaming: false };
-                  }
-                  updated.push({
-                    id: Date.now().toString(),
-                    role: "assistant",
-                    content: "",
-                    timestamp: new Date().toISOString(),
-                    isStreaming: true,
-                  });
-                  return updated;
-                });
-                fullText = "";
-              } else if (event.event === "status" || event.event === "flow_status") {
+              } else if (event.event === "status") {
                 const statusText = event.message || "";
                 if (statusText) {
                   setMessages((prev) => {
@@ -146,10 +128,8 @@ export function useChat(): UseChatReturn {
                     return updated;
                   });
                 }
-              } else if (event.event === "start" && event.thread_id) {
-                newThreadId = event.thread_id;
               } else if (event.event === "done") {
-                if (event.thread_id) newThreadId = event.thread_id;
+                // stream complete
               } else if (event.event === "error") {
                 throw new Error(event.message || "Stream error");
               }
@@ -169,11 +149,9 @@ export function useChat(): UseChatReturn {
           if (last && last.role === "assistant") {
             updated[updated.length - 1] = { ...last, isStreaming: false };
           }
-          saveState(updated, newThreadId);
+          saveState(updated);
           return updated;
         });
-
-        if (newThreadId) setThreadId(newThreadId);
       } catch (err) {
         if ((err as Error).name === "AbortError") return;
 
@@ -196,7 +174,7 @@ export function useChat(): UseChatReturn {
         abortRef.current = null;
       }
     },
-    [messages, threadId, isStreaming, getProxyUrl, saveState]
+    [messages, isStreaming, getProxyUrl, saveState]
   );
 
   const stopStreaming = useCallback(() => {
@@ -215,17 +193,16 @@ export function useChat(): UseChatReturn {
             updated.pop();
           }
         }
-        saveState(updated, threadId);
+        saveState(updated);
         return updated;
       });
     }
-  }, [saveState, threadId]);
+  }, [saveState]);
 
   const clearChat = useCallback(async () => {
     setMessages([]);
-    setThreadId(null);
     setError(null);
-    await setStorage({ messages: [], threadId: null });
+    await setStorage({ messages: [] });
   }, []);
 
   const retryLast = useCallback(async () => {
@@ -244,15 +221,14 @@ export function useChat(): UseChatReturn {
     const trimmed = messages.slice(0, lastUserIndex);
     setMessages(trimmed);
     setError(null);
-    await saveState(trimmed, threadId);
+    await saveState(trimmed);
 
     setTimeout(() => sendMessage(lastUserText), 50);
-  }, [messages, threadId, isStreaming, saveState, sendMessage]);
+  }, [messages, isStreaming, saveState, sendMessage]);
 
   return {
     messages,
     isStreaming,
-    threadId,
     error,
     sendMessage,
     stopStreaming,
