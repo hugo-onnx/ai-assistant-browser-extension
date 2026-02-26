@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "watsonx Orchestrate Chat",
+  "name": "AI Assistant",
   "version": "1.0.0",
-  "description": "Chat with IBM watsonx Orchestrate from your browser sidebar",
+  "description": "A Chrome side panel AI assistant supporting OpenAI and Claude",
   "permissions": ["sidePanel", "storage"],
   "side_panel": {
     "default_path": "sidepanel.html"
@@ -16,7 +16,7 @@
       "192": "icons/icon192.png",
       "512": "icons/icon512.png"
     },
-    "default_title": "Open watsonx Chat"
+    "default_title": "AI Assistant"
   },
   "options_page": "options.html",
   "icons": {
