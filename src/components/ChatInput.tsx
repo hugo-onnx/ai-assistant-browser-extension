@@ -65,24 +65,24 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }: Cha
           placeholder="Type a message…"
           disabled={disabled}
           rows={1}
-          className="flex-1 bg-transparent text-text-primary placeholder-text-placeholder text-[15px] leading-relaxed resize-none outline-none px-4 py-2.5 max-h-[120px] focus:outline-none"
+          className="flex-1 bg-transparent text-text-primary placeholder-text-placeholder text-[16px] leading-relaxed resize-none outline-none px-4 py-2.5 max-h-[120px] focus:outline-none"
         />
         <button
           onClick={handleSubmit}
           disabled={disabled || (!isStreaming && !hasText)}
-          className={`shrink-0 w-10 h-10 m-1 flex items-center justify-center rounded-xl transition-colors ${
+          className={`shrink-0 w-10 h-10 m-1 flex items-center justify-center rounded-xl transition-all ${
             isStreaming
               ? "text-text-on-color hover:opacity-90"
               : hasText
               ? "text-text-on-color hover:opacity-90 active:opacity-75"
-              : "text-text-disabled cursor-not-allowed"
+              : "cursor-not-allowed"
           }`}
           style={
             isStreaming
               ? { background: "var(--color-button-danger)" }
               : hasText
               ? { background: "var(--baai-gradient-logo)", boxShadow: "var(--baai-glow-sm)" }
-              : { background: "transparent" }
+              : { background: "transparent", color: "var(--color-border-strong-01)", opacity: 0.6 }
           }
           title={isStreaming ? "Stop" : "Send"}
         >
