@@ -66,7 +66,7 @@ export default function App() {
           ))}
 
           {error && (
-            <div className="mb-4 px-4 py-3 text-sm bg-layer-01 border-l-[3px] border-support-error text-text-error flex items-start gap-2">
+            <div className="mb-4 px-4 py-3 text-sm rounded-xl border border-support-error text-text-error flex items-start gap-2" style={{ background: "rgba(196, 30, 58, 0.08)" }}>
               <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" className="shrink-0 mt-0.5">
                 <path d="M16 2a14 14 0 1014 14A14 14 0 0016 2zm0 26a12 12 0 1112-12 12 12 0 01-12 12z" />
                 <path d="M15 8h2v11h-2zM16 22a1.5 1.5 0 101.5 1.5A1.5 1.5 0 0016 22z" />
