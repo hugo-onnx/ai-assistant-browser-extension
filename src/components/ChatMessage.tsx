@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { renderMarkdown } from "../utils/markdown";
 import type { ChatMessage as ChatMessageType } from "../types";
 
@@ -125,10 +125,11 @@ function UserMessage({ content, timestamp }: { content: string; timestamp: strin
   return (
     <div className="flex flex-col items-end mb-4">
       <div
-        className="max-w-[85%] px-4 py-3 text-sm leading-relaxed text-white rounded-2xl rounded-br-sm"
+        className="max-w-[85%] px-4 py-3 leading-relaxed text-white rounded-2xl rounded-br-sm"
         style={{
           background: "var(--baai-gradient-blue)",
           boxShadow: "0 4px 16px rgba(74, 143, 255, 0.2)",
+          fontSize: "16px",
         }}
       >
         {content}
@@ -150,6 +151,9 @@ interface AssistantMessageProps {
   onRetry?: () => void;
 }
 
+const COPY_ICON = `<svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor"><path d="M28 10v18H10V10h18m0-2H10a2 2 0 00-2 2v18a2 2 0 002 2h18a2 2 0 002-2V10a2 2 0 00-2-2z"/><path d="M4 18H2V4a2 2 0 012-2h14v2H4z"/></svg>`;
+const CHECK_ICON = `<svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor"><path d="M13 24l-9-9 1.41-1.41L13 21.17 26.59 7.58 28 9z"/></svg>`;
+
 function AssistantMessage({
   content,
   isStreaming,
@@ -160,6 +164,46 @@ function AssistantMessage({
   onRetry,
 }: AssistantMessageProps) {
   const html = useMemo(() => renderMarkdown(content), [content]);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // React onClick on the container — event delegation without ref timing issues.
+  const handleContentClick = useCallback(async (e: React.MouseEvent) => {
+    const btn = (e.target as Element).closest<HTMLButtonElement>(".code-copy-btn");
+    if (!btn) return;
+
+    const text = btn.closest("pre")?.querySelector("code")?.textContent ?? "";
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    btn.innerHTML = CHECK_ICON;
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.innerHTML = COPY_ICON;
+      btn.classList.remove("copied");
+    }, 2000);
+  }, []);
+
+  // Button injection — no dep array so it runs after every render (including theme switch).
+  // The presence guard keeps it idempotent.
+  useEffect(() => {
+    if (isStreaming || !contentRef.current) return;
+    contentRef.current.querySelectorAll<HTMLElement>("pre").forEach((pre) => {
+      if (pre.querySelector(".code-copy-btn")) return;
+      const btn = document.createElement("button");
+      btn.className = "code-copy-btn";
+      btn.title = "Copy code";
+      btn.innerHTML = COPY_ICON;
+      pre.appendChild(btn);
+    });
+  });
 
   return (
     <div className="group flex justify-start mb-4">
@@ -176,11 +220,13 @@ function AssistantMessage({
             }`}
             style={{
               background: "var(--color-layer-01)",
-              border: isError ? undefined : "1px solid var(--color-border-subtle-01)",
+              border: isError ? undefined : "1px solid var(--color-border-strong-01)",
             }}
           >
             {content ? (
               <div
+                ref={contentRef}
+                onClick={handleContentClick}
                 className={`markdown-content text-text-primary ${
                   isStreaming ? "typing-cursor" : ""
                 }`}
