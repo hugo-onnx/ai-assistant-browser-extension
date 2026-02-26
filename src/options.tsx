@@ -36,7 +36,7 @@ function Options() {
             className="w-12 h-12 rounded-full flex items-center justify-center"
             style={{ background: "var(--color-button-primary)" }}
           >
-            <span className="text-sm font-bold text-white tracking-tight">wx</span>
+            <span className="text-sm font-bold text-white tracking-tight">AI</span>
           </div>
           <div>
             <h1 className="text-lg font-semibold text-text-primary">
@@ -62,8 +62,7 @@ function Options() {
               className="w-full bg-layer-01 text-text-primary placeholder-text-placeholder text-base outline-none px-4 h-12 border-b-2 border-border-strong-01 focus:border-interactive transition-colors"
             />
             <p className="text-sm text-text-helper mt-3 leading-relaxed">
-              The URL of your FastAPI proxy server that connects to watsonx
-              Orchestrate.
+              The URL of your FastAPI proxy server (supports OpenAI and Claude).
             </p>
           </div>
 
