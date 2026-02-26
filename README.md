@@ -1,9 +1,9 @@
-# watsonx Orchestrate – Chrome Extension
+# AI Assistant – Chrome Extension
 
-A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** from your browser sidebar. It connects through a lightweight FastAPI proxy server that handles authentication and streaming.
+A Google Chrome extension that lets you chat with an AI directly from your browser sidebar. It connects through a lightweight FastAPI proxy server that handles streaming, powered by **Groq** for fast, free inference.
 
 ![Chrome Side Panel](https://img.shields.io/badge/Chrome-Side%20Panel%20API-4285F4?logo=googlechrome&logoColor=white)
-![IBM watsonx](https://img.shields.io/badge/IBM-watsonx%20Orchestrate-0F62FE?logo=ibm&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-LLM%20Inference-F55036?logoColor=white)
 ![Carbon Design](https://img.shields.io/badge/IBM-Carbon%20Design%20System-161616?logo=ibm&logoColor=white)
 
 ---
@@ -26,29 +26,29 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 │  Hooks:                                      │
 │   └── useChat (SSE streaming, state mgmt)    │
 └──────────────────┬───────────────────────────┘
-                   │ POST /chat/stream (SSE)
+                   │ POST /chat/stream
+                   │ { messages: [...] }
                    ▼
 ┌──────────────────────────────────────────────┐
 │            FastAPI Proxy Server              │
 │                                              │
 │  Endpoints:                                  │
 │   ├── POST /chat/stream (SSE)                │
-│   ├── GET  /health                           │
-│   └── GET  /docs (Swagger)                   │
+│   └── GET  /health                           │
 │                                              │
 │  Features:                                   │
-│   ├── IAM token caching & auto-refresh       │
 │   ├── SSE stream parsing & forwarding        │
-│   ├── Async flow detection & polling         │
-│   └── Thread message polling                 │
+│   └── Conversation history forwarded         │
 └──────────────────┬───────────────────────────┘
-                   │ POST /v1/orchestrate/runs?stream=true
-                   │ GET  /v1/orchestrate/threads/{id}/messages
+                   │ POST /openai/v1/chat/completions
+                   │ Authorization: Bearer {API_KEY}
                    ▼
 ┌──────────────────────────────────────────────┐
-│       IBM watsonx Orchestrate API            │
+│              Groq API                        │
 └──────────────────────────────────────────────┘
 ```
+
+**Key design principle:** Conversation history is owned entirely by the extension. Every request sends the full `messages` array — there is no server-side session or thread concept.
 
 ---
 
@@ -56,29 +56,29 @@ A Google Chrome extension that lets you chat with **IBM watsonx Orchestrate** fr
 
 ### Chat
 - **Real-time streaming** — Token-by-token display via Server-Sent Events (SSE)
+- **Conversation history** — Full context sent with every request
 - **Markdown rendering** — Tables, code blocks with syntax highlighting, lists, blockquotes
-- **Thread persistence** — Conversations are saved to `chrome.storage.local`
-
-### Async Flow Support
-- **Flow detection** — Automatically detects when watsonx triggers a long-running flow
-- **Background polling** — Polls the thread messages API every 8 seconds for up to 10 minutes
-- **Status indicators** — Pulsing dot with elapsed time during flow processing
-- **Result delivery** — Flow results appear as a new message bubble when complete
+- **Message persistence** — Conversations saved to `chrome.storage.local`
+- **Copy & retry** — Copy any message or regenerate the last response
 
 ### Design
 - **IBM Carbon Design System** — g100 (dark) and g10 (light) themes with official color tokens
 - **Dark/light toggle** — Switch themes from the header; preference persists across sessions
 - **IBM Plex fonts** — IBM Plex Sans and IBM Plex Mono
-- **Carbon patterns** — UI Shell header, DataTable, clickable tiles, inline notifications, form inputs, icon buttons
-- **Connection status** — Live indicator dot in the header showing proxy availability
-- **Responsive** — Works in Chrome's side panel (narrow) and standalone (dev mode)
+- **Connection status** — Live indicator dot showing proxy availability
+
+### Security
+- **DOMPurify** — All markdown output sanitized before rendering (XSS protection)
+- **Input validation** — Message roles and content length validated server-side
+- **Generic error messages** — Internal API errors logged server-side only, never exposed to the client
+- **Restricted CORS** — Credentials disabled; only `Content-Type` header allowed
 
 ---
 
 ## Project Structure
 
 ```
-wxo-extension/                    # Chrome Extension (Frontend)
+ai-assistant-browser-extension/
 ├── sidepanel.html                # Side panel entry point
 ├── options.html                  # Settings page entry point
 ├── package.json                  # Dependencies
@@ -87,10 +87,9 @@ wxo-extension/                    # Chrome Extension (Frontend)
 ├── public/
 │   ├── manifest.json             # Chrome Extension Manifest V3
 │   ├── background.js             # Service worker (side panel behavior)
-│   └── icons/                    # Extension icons (16, 48, 128px)
+│   └── icons/                    # Extension icons
 └── src/
     ├── types.ts                  # Shared TypeScript interfaces
-    ├── vite-env.d.ts             # Vite type declarations
     ├── index.css                 # Carbon g100/g10 theme tokens + markdown styles
     ├── sidepanel.tsx             # React mount for side panel
     ├── options.tsx               # Settings page (proxy URL config)
@@ -101,28 +100,26 @@ wxo-extension/                    # Chrome Extension (Frontend)
     │   ├── ChatInput.tsx         # Text input + send/stop button
     │   └── WelcomeScreen.tsx     # Landing screen with suggestion tiles
     ├── hooks/
-    │   ├── useChat.ts            # Chat state, SSE streaming, flow events
+    │   ├── useChat.ts            # Chat state, SSE streaming
     │   ├── useConnectionStatus.ts # Proxy health polling
     │   └── useTheme.ts           # Dark/light theme toggle (g100/g10)
     └── utils/
-        ├── markdown.ts           # Marked + highlight.js renderer
+        ├── markdown.ts           # Marked + highlight.js + DOMPurify renderer
         └── storage.ts            # chrome.storage abstraction
 
 proxy-server/                     # FastAPI Proxy Server (Backend)
 ├── pyproject.toml                # Project metadata & dependencies
 ├── uv.lock                       # Locked dependency versions
-├── Dockerfile                    # Container image (OpenShift-compatible)
+├── Dockerfile                    # Container image
 ├── .dockerignore                 # Files excluded from image
-├── .env                          # Environment variables (create this)
+├── .env                          # Environment variables (never commit this)
+├── .env.example                  # Example configuration
 └── app/
-    ├── __init__.py
     ├── main.py                   # FastAPI app, CORS, lifespan
     ├── config.py                 # Pydantic settings from .env
-    ├── auth.py                   # IAM token manager (cache + refresh)
     ├── models.py                 # Request/response Pydantic models
     └── routes/
-        ├── __init__.py
-        └── chat.py               # /chat/stream endpoint + flow polling
+        └── chat.py               # /chat/stream endpoint
 ```
 
 ---
@@ -135,35 +132,42 @@ proxy-server/                     # FastAPI Proxy Server (Backend)
 - **[uv](https://github.com/astral-sh/uv)** ≥ 0.5 (Python package manager)
 - **Python** ≥ 3.11 (managed by uv)
 - **Google Chrome** ≥ 116 (Side Panel API support)
-- **Docker** or **Podman** (for containerized deployment)
-- **IBM Cloud** account with watsonx Orchestrate instance
+- **Groq API key** — free at [console.groq.com](https://console.groq.com)
 
 ### 1. Proxy Server
 
 ```bash
 cd proxy-server
 
-# Install dependencies with uv
+# Install dependencies
 uv sync
 
 # Configure environment
-cp .env.example .env        # then edit with your values
+cp .env.example .env   # then fill in your values
 ```
 
-Create a `.env` file with your IBM credentials:
+Edit `.env`:
 
 ```env
-IBM_API_KEY=your-ibm-cloud-api-key
-WXO_API_ENDPOINT=https://api.eu-de.watson-orchestrate.cloud.ibm.com/instances/your-instance-id
-WXO_AGENT_ID=your-agent-id
+API_KEY=gsk_your-groq-api-key
+MODEL=llama-3.1-8b-instant
+
+# Optional — Groq API sampling parameters
+TEMPERATURE=1.0
+TOP_P=1.0
+MAX_COMPLETION_TOKENS=8192
+
+ALLOWED_ORIGINS=*
 ```
 
-| Variable | Description |
-|---|---|
-| `IBM_API_KEY` | IBM Cloud IAM API key with access to your watsonx instance |
-| `WXO_API_ENDPOINT` | Full base URL of your watsonx Orchestrate instance (including `/instances/{id}`) |
-| `WXO_AGENT_ID` | The agent/assistant ID to chat with |
-| `ALLOWED_ORIGINS` | CORS origins (default: `*`). Set to `chrome-extension://your-extension-id` for production |
+| Variable | Default | Description |
+|---|---|---|
+| `API_KEY` | — | Groq API key (required) |
+| `MODEL` | `llama-3.1-8b-instant` | Groq model ID |
+| `TEMPERATURE` | `1.0` | Sampling temperature (0.0–2.0) |
+| `TOP_P` | `1.0` | Nucleus sampling threshold (0.0–1.0) |
+| `MAX_COMPLETION_TOKENS` | `8192` | Max tokens in the response |
+| `ALLOWED_ORIGINS` | `*` | CORS origins. Set to your extension origin in production |
 
 Start the server:
 
@@ -175,22 +179,22 @@ Verify it's running:
 
 ```bash
 curl http://localhost:8000/health
-# {"status":"ok","service":"wxo-proxy"}
+# {"status":"ok","service":"ai-assistant-proxy"}
 ```
 
-API docs available at: http://localhost:8000/docs
+Test streaming:
+
+```bash
+curl -N -X POST http://localhost:8000/chat/stream \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Say hello"}]}'
+```
 
 ### 2. Chrome Extension
 
 ```bash
-cd wxo-extension
-
 # Install dependencies
 npm install
-
-# Development mode (hot reload)
-npm run dev
-# → Open http://localhost:5173/sidepanel.html in browser
 
 # Production build
 npm run build
@@ -202,8 +206,8 @@ npm run build
 1. Open `chrome://extensions/`
 2. Enable **Developer mode** (toggle in top-right)
 3. Click **Load unpacked**
-4. Select the `wxo-extension/dist/` folder
-5. Click the extension icon in Chrome toolbar → side panel opens
+4. Select the `dist/` folder
+5. Click the extension icon in the Chrome toolbar → side panel opens
 
 #### Configure Proxy URL
 
@@ -215,17 +219,18 @@ npm run build
 
 ## API Reference
 
-### Proxy Endpoints
+### `POST /chat/stream`
 
-#### `POST /chat/stream`
-
-Sends a message to watsonx Orchestrate and returns a streaming SSE response.
+Sends the conversation history to Groq and returns a streaming SSE response.
 
 **Request:**
 ```json
 {
-  "message": "What can you help me with?",
-  "thread_id": null
+  "messages": [
+    { "role": "user", "content": "Hello!" },
+    { "role": "assistant", "content": "Hi, how can I help?" },
+    { "role": "user", "content": "What is the capital of France?" }
+  ]
 }
 ```
 
@@ -233,70 +238,36 @@ Sends a message to watsonx Orchestrate and returns a streaming SSE response.
 
 | Event | Fields | Description |
 |---|---|---|
-| `start` | `thread_id`, `run_id` | Stream has started |
+| `start` | — | Stream has started |
 | `delta` | `text` | Incremental text chunk |
-| `status` | `message` | Agent processing status (e.g., "Thinking…") |
-| `flow_status` | `message` | Flow polling status (e.g., "Still processing… (120s)") |
-| `new_message` | — | Separator before a new message bubble (flow results) |
-| `done` | `thread_id` | Stream complete |
+| `done` | — | Stream complete |
 | `error` | `message` | Error occurred |
 
-**Example SSE stream:**
+**Example stream:**
 ```
-data: {"event": "start", "thread_id": "abc-123", "run_id": "def-456"}
-data: {"event": "delta", "text": "Here are the "}
-data: {"event": "delta", "text": "results you requested."}
-data: {"event": "done", "thread_id": "abc-123"}
+data: {"event": "start"}
+data: {"event": "delta", "text": "The capital"}
+data: {"event": "delta", "text": " of France is Paris."}
+data: {"event": "done"}
 ```
 
-#### `GET /health`
+### `GET /health`
 
-Health check endpoint.
-
-**Response:**
 ```json
-{
-  "status": "ok",
-  "service": "wxo-proxy"
-}
+{ "status": "ok", "service": "ai-assistant-proxy" }
 ```
 
 ---
 
 ## How It Works
 
-### Normal Messages
-
 1. User types a message in the side panel
-2. Extension sends `POST /chat/stream` to the proxy
-3. Proxy authenticates with IBM IAM (tokens are cached for ~1 hour)
-4. Proxy forwards the message to `POST /v1/orchestrate/runs?stream=true`
-5. watsonx returns an NDJSON stream with events: `run.started`, `message.delta`, `run.completed`, `done`
-6. Proxy parses events and re-emits simplified SSE to the extension
-7. Extension renders text token-by-token with a typing cursor
-
-### Async Flows
-
-Some watsonx operations (e.g., create data exports) trigger long-running background flows:
-
-1. watsonx immediately returns a "A new flow has started…" message, then closes the stream
-2. Proxy detects the flow indicator text
-3. Proxy begins polling `GET /v1/orchestrate/threads/{thread_id}/messages` every 8 seconds
-4. Extension shows a pulsing "Processing flow…" indicator
-5. When a new assistant message appears on the thread (up to 10 minutes), the proxy emits it as a `new_message` + `delta` event
-6. Extension displays the result in a new message bubble
-
-### IAM Token Management
-
-The proxy caches IAM tokens and refreshes them 5 minutes before expiry:
-
-```
-POST https://iam.cloud.ibm.com/identity/token
-  grant_type=urn:ibm:params:oauth:grant-type:apikey
-  &apikey={IBM_API_KEY}
-```
-
-Tokens are valid for ~1 hour. The proxy handles refresh transparently.
+2. Extension appends it to the local message history and sends the full `messages` array to `POST /chat/stream`
+3. Proxy forwards the messages to the Groq API with the configured model and sampling parameters
+4. Groq streams back tokens using the OpenAI-compatible SSE format
+5. Proxy parses each chunk and re-emits simplified `delta` events to the extension
+6. Extension renders text token-by-token with a typing cursor
+7. On completion, the full conversation (including the new assistant reply) is saved to `chrome.storage.local`
 
 ---
 
@@ -308,12 +279,13 @@ Tokens are valid for ~1 hour. The proxy handles refresh transparently.
 |---|---|---|
 | TypeScript | 5.7 | Type-safe development |
 | React | 19 | UI framework |
-| Vite | 6 | Build tool with HMR |
+| Vite | 6 | Build tool |
 | Tailwind CSS | 4 | Utility-first CSS |
-| IBM Carbon Design | g100/g10 | Dark & light theme tokens, typography, spacing |
-| IBM Plex Sans/Mono | — | Official IBM typeface |
+| IBM Carbon Design | g100/g10 | Dark & light theme tokens |
+| IBM Plex Sans/Mono | — | Typography |
 | Marked | 15 | Markdown to HTML |
 | highlight.js | 11 | Code syntax highlighting |
+| DOMPurify | 3 | XSS sanitization |
 
 ### Backend (Proxy Server)
 
@@ -333,17 +305,10 @@ Tokens are valid for ~1 hour. The proxy handles refresh transparently.
 ### Extension Dev Mode
 
 ```bash
-cd wxo-extension
 npm run dev
 ```
 
-Open `http://localhost:5173/sidepanel.html` — changes hot-reload instantly. Note: `chrome.storage` APIs are not available in dev mode; the extension falls back to localStorage.
-
-To run type checking separately:
-
-```bash
-npm run typecheck
-```
+Open `http://localhost:5173/sidepanel.html` — changes hot-reload instantly. Note: `chrome.storage` APIs are not available in dev mode.
 
 ### Proxy Dev Mode
 
@@ -352,35 +317,22 @@ cd proxy-server
 uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The `--reload` flag enables auto-restart on file changes. API docs at `http://localhost:8000/docs`.
-
-### Building for Production
-
-```bash
-cd wxo-extension
-npm run build
-```
-
-The `dist/` folder contains the production Chrome extension. Load it as an unpacked extension or package it as a `.crx` file.
+The `--reload` flag enables auto-restart on file changes. Swagger docs available at `http://localhost:8000/docs`.
 
 ### Docker
 
-Build and run the proxy server as a container:
-
 ```bash
 cd proxy-server
-docker build -t proxy-server .
-docker run -p 8000:8000 --env-file .env proxy-server
+docker build -t ai-assistant-proxy .
+docker run -p 8000:8000 --env-file .env ai-assistant-proxy
 ```
 
 Or with Podman:
 
 ```bash
-podman build -t proxy-server .
-podman run -p 8000:8000 --env-file .env proxy-server
+podman build -t ai-assistant-proxy .
+podman run -p 8000:8000 --env-file .env ai-assistant-proxy
 ```
-
-The image is based on `ghcr.io/astral-sh/uv:python3.13-bookworm-slim`. It runs as a non-root user and is compatible with OpenShift's arbitrary UID policy.
 
 ---
 
@@ -388,13 +340,12 @@ The image is based on `ghcr.io/astral-sh/uv:python3.13-bookworm-slim`. It runs a
 
 | Issue | Solution |
 |---|---|
-| Blank side panel | Check browser console (F12). Ensure proxy is running |
-| "Proxy error: 401" | IAM token expired or invalid `IBM_API_KEY` — check `.env` |
-| "Proxy error: 404" | Verify `WXO_API_ENDPOINT` includes the full instance path |
-| "Proxy error: 422" | Check `WXO_AGENT_ID` is correct |
+| Blank side panel | Check browser console (F12). Ensure proxy is running at the configured URL |
+| Red connection dot | Proxy is not reachable — start it with `uv run uvicorn app.main:app` |
+| `Failed to get a response` | Check your `API_KEY` in `.env` is valid and has quota |
+| `422 Unprocessable Entity` | Request validation failed, check message format |
 | Extension not loading | Ensure you loaded the `dist/` folder, not the source root |
-| Fonts not loading | Extension needs internet access for Google Fonts CDN |
-| Flow result never appears | Flow may take >10 min. Check proxy logs for polling status |
+| Fonts not loading | Extension needs internet access for IBM Plex fonts CDN |
 
 ---
 
