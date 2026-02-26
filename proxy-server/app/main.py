@@ -20,18 +20,16 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Application startup and shutdown events."""
     settings = get_settings()
-    logger.info("Starting wxo-proxy server")
-    logger.info("WXO endpoint: %s", settings.wxo_api_endpoint)
-    logger.info("WXO agent ID: %s", settings.wxo_agent_id)
-    logger.info("WXO stream URL: %s", settings.wxo_stream_url)
+    logger.info("Starting AI Assistant Proxy (Groq)")
+    logger.info("Model: %s", settings.model)
     logger.info("CORS origins: %s", settings.cors_origins)
     yield
-    logger.info("Shutting down wxo-proxy server")
+    logger.info("Shutting down AI Assistant Proxy")
 
 
 app = FastAPI(
-    title="watsonx Orchestrate Proxy",
-    description="FastAPI proxy for IBM watsonx Orchestrate with streaming support",
+    title="AI Assistant Proxy",
+    description="FastAPI proxy for Groq with streaming support",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -41,9 +39,9 @@ settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 # Register routes
