@@ -35,20 +35,23 @@ export default function Header({ onClear, hasMessages, connectionStatus, isDark,
 
   return (
     <header
-      className="flex items-center justify-between h-12 px-4 bg-background border-b border-border-subtle-00"
-      style={{ minHeight: "48px" }}
+      className="flex items-center justify-between px-4 bg-background border-b border-border-subtle-00"
+      style={{ minHeight: "48px", borderBottomColor: "rgba(74, 143, 255, 0.15)" }}
     >
-      <div className="flex items-center gap-3">
-        <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: "var(--color-button-primary)" }}>
-          <span className="text-[9px] font-bold text-white leading-none">AI</span>
+      <div className="flex items-center gap-2.5">
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+          style={{ background: "var(--baai-gradient-logo)", boxShadow: "var(--baai-glow-sm)" }}
+        >
+          <span className="text-[9px] font-bold text-white leading-none tracking-wider">AI</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-text-primary leading-none">
+          <span className="text-sm font-semibold text-text-primary leading-none tracking-wide">
             AI Assistant
           </span>
           <span
-            className="w-2 h-2 rounded-full shrink-0"
-            style={{ background: cfg.color }}
+            className="w-1.5 h-1.5 rounded-full shrink-0"
+            style={{ background: cfg.color, boxShadow: `0 0 6px ${cfg.color}` }}
             title={cfg.label}
           />
         </div>
@@ -57,7 +60,7 @@ export default function Header({ onClear, hasMessages, connectionStatus, isDark,
       <div className="flex items-center">
         <button
           onClick={onToggleTheme}
-          className="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-background-hover active:bg-background-active transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-background-hover active:bg-background-active rounded-lg transition-colors"
           title={isDark ? "Switch to light theme" : "Switch to dark theme"}
         >
           <IconTheme />
@@ -65,7 +68,7 @@ export default function Header({ onClear, hasMessages, connectionStatus, isDark,
         {hasMessages && (
           <button
             onClick={onClear}
-            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-background-hover active:bg-background-active transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-background-hover active:bg-background-active rounded-lg transition-colors"
             title="New conversation"
           >
             <IconAdd />
@@ -74,7 +77,7 @@ export default function Header({ onClear, hasMessages, connectionStatus, isDark,
         <a
           href="options.html"
           target="_blank"
-          className="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-background-hover active:bg-background-active transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-background-hover active:bg-background-active rounded-lg transition-colors"
           title="Settings"
         >
           <IconSettings />
