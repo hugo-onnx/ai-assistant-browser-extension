@@ -57,7 +57,7 @@ const AiAvatar = () => (
     className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
     style={{ background: "var(--color-button-primary)" }}
   >
-    <span className="text-[10px] font-bold text-white tracking-tight">wx</span>
+    <span className="text-[10px] font-bold text-white tracking-tight">AI</span>
   </div>
 );
 
