@@ -1,7 +1,7 @@
 const SUGGESTIONS = [
   "What can you help me with?",
-  "Summarize the latest updates",
-  "Search for open tasks",
+  "Help me write or improve code",
+  "Explain a concept or summarize text",
 ];
 
 interface WelcomeScreenProps {
@@ -15,11 +15,11 @@ export default function WelcomeScreen({ onSuggestionClick }: WelcomeScreenProps)
         className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
         style={{ background: "var(--color-button-primary)" }}
       >
-        <span className="text-xl font-bold text-white tracking-tight">wx</span>
+        <span className="text-xl font-bold text-white tracking-tight">AI</span>
       </div>
 
       <h2 className="text-base font-semibold text-text-primary mb-1">
-        watsonx Orchestrate
+        AI Assistant
       </h2>
       <p className="text-sm text-text-secondary text-center mb-8 max-w-[240px] leading-relaxed">
         How can I help you today?
