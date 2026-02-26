@@ -1,4 +1,5 @@
 import { Marked, type Tokens } from "marked";
+import DOMPurify from "dompurify";
 import hljs from "highlight.js/lib/core";
 
 import javascript from "highlight.js/lib/languages/javascript";
@@ -76,8 +77,22 @@ marked.use({
 export function renderMarkdown(text: string): string {
   if (!text) return "";
   try {
-    return marked.parse(text) as string;
+    const html = marked.parse(text) as string;
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [
+        "p", "br", "strong", "em", "u", "s",
+        "h1", "h2", "h3", "h4", "h5", "h6",
+        "ul", "ol", "li",
+        "pre", "code",
+        "blockquote",
+        "table", "thead", "tbody", "tr", "th", "td",
+        "div", "span", "a",
+        "hr",
+      ],
+      ALLOWED_ATTR: ["class", "style", "href", "title", "target", "rel"],
+      ALLOW_DATA_ATTR: false,
+    });
   } catch {
-    return text;
+    return DOMPurify.sanitize(text);
   }
 }
