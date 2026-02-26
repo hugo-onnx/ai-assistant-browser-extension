@@ -54,8 +54,8 @@ function formatTime(isoString: string): string {
 
 const AiAvatar = () => (
   <div
-    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-    style={{ background: "var(--color-button-primary)" }}
+    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center baai-avatar-glow"
+    style={{ background: "var(--baai-gradient-accent)" }}
   >
     <span className="text-[10px] font-bold text-white tracking-tight">AI</span>
   </div>
@@ -125,8 +125,11 @@ function UserMessage({ content, timestamp }: { content: string; timestamp: strin
   return (
     <div className="flex flex-col items-end mb-4">
       <div
-        className="max-w-[85%] px-4 py-3 text-sm leading-relaxed text-text-on-color rounded-tl-lg rounded-tr-lg rounded-bl-lg"
-        style={{ background: "var(--color-button-primary)" }}
+        className="max-w-[85%] px-4 py-3 text-sm leading-relaxed text-white rounded-2xl rounded-br-sm"
+        style={{
+          background: "var(--baai-gradient-blue)",
+          boxShadow: "0 4px 16px rgba(74, 143, 255, 0.2)",
+        }}
       >
         {content}
       </div>
@@ -168,9 +171,13 @@ function AssistantMessage({
             {!isStreaming && <Timestamp iso={timestamp} />}
           </div>
           <div
-            className={`bg-layer-01 rounded-lg px-4 py-3 ${
+            className={`rounded-2xl rounded-tl-sm px-4 py-3 ${
               isError ? "border border-support-error" : ""
             }`}
+            style={{
+              background: "var(--color-layer-01)",
+              border: isError ? undefined : "1px solid var(--color-border-subtle-01)",
+            }}
           >
             {content ? (
               <div
@@ -181,9 +188,9 @@ function AssistantMessage({
               />
             ) : isStreaming ? (
               <div className="flex gap-1.5 py-1">
-                <span className="w-2 h-2 rounded-full bg-interactive animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 rounded-full bg-interactive animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 rounded-full bg-interactive animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "var(--color-interactive)", boxShadow: "0 0 6px var(--color-interactive)", animationDelay: "0ms" }} />
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "var(--color-interactive)", boxShadow: "0 0 6px var(--color-interactive)", animationDelay: "150ms" }} />
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "var(--color-interactive)", boxShadow: "0 0 6px var(--color-interactive)", animationDelay: "300ms" }} />
               </div>
             ) : null}
 
