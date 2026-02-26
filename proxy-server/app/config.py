@@ -3,14 +3,14 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    # IBM watsonx Orchestrate
-    ibm_api_key: str
-    wxo_api_endpoint: str
-    wxo_agent_id: str
+    # Groq
+    api_key: str
+    model: str = "llama-3.1-8b-instant"
 
-    # IAM
-    iam_token_url: str = "https://iam.cloud.ibm.com/identity/token"
-    token_refresh_margin_seconds: int = 300
+    # Sampling parameters
+    temperature: float = 1.0
+    top_p: float = 1.0
+    max_completion_tokens: int = 8192
 
     # Server
     host: str = "0.0.0.0"
@@ -26,21 +26,7 @@ class Settings(BaseSettings):
             return ["*"]
         return [o.strip() for o in self.allowed_origins.split(",")]
 
-    @property
-    def wxo_base(self) -> str:
-        return self.wxo_api_endpoint.rstrip("/")
-
-    @property
-    def wxo_runs_url(self) -> str:
-        """Orchestrate runs endpoint: /v1/orchestrate/runs"""
-        return f"{self.wxo_base}/v1/orchestrate/runs"
-
-    @property
-    def wxo_stream_url(self) -> str:
-        """Orchestrate runs streaming: /v1/orchestrate/runs?stream=true"""
-        return f"{self.wxo_base}/v1/orchestrate/runs?stream=true"
-
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 @lru_cache
