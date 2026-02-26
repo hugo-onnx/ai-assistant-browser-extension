@@ -40,11 +40,11 @@ export default function Header({ onClear, hasMessages, connectionStatus, isDark,
     >
       <div className="flex items-center gap-3">
         <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: "var(--color-button-primary)" }}>
-          <span className="text-[9px] font-bold text-white leading-none">wx</span>
+          <span className="text-[9px] font-bold text-white leading-none">AI</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-text-primary leading-none">
-            watsonx Orchestrate
+            AI Assistant
           </span>
           <span
             className="w-2 h-2 rounded-full shrink-0"
