@@ -52,30 +52,38 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }: Cha
   const hasText = text.trim().length > 0;
 
   return (
-    <div className="border-t border-border-subtle-00 bg-background p-4">
-      <div className="flex items-end gap-0">
-        <div className="flex-1 bg-layer-01 border-b-2 border-border-strong-01 has-[:focus]:border-interactive has-[:focus]:outline has-[:focus]:outline-2 has-[:focus]:outline-focus has-[:focus]:-outline-offset-2 transition-colors h-[42px] flex items-center">
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message…"
-            disabled={disabled}
-            rows={1}
-            className="w-full bg-transparent text-text-primary placeholder-text-placeholder text-[15px] leading-relaxed resize-none outline-none px-4 max-h-[120px] focus:outline-none"
-          />
-        </div>
+    <div
+      className="bg-background px-3 py-3"
+      style={{ borderTop: "1px solid rgba(74, 143, 255, 0.12)" }}
+    >
+      <div className="baai-input-wrapper flex items-end gap-0 bg-layer-01">
+        <textarea
+          ref={textareaRef}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a message…"
+          disabled={disabled}
+          rows={1}
+          className="flex-1 bg-transparent text-text-primary placeholder-text-placeholder text-[15px] leading-relaxed resize-none outline-none px-4 py-2.5 max-h-[120px] focus:outline-none"
+        />
         <button
           onClick={handleSubmit}
           disabled={disabled || (!isStreaming && !hasText)}
-          className={`shrink-0 w-[42px] h-[42px] flex items-center justify-center transition-colors ${
+          className={`shrink-0 w-10 h-10 m-1 flex items-center justify-center rounded-xl transition-colors ${
             isStreaming
-              ? "bg-button-danger text-text-on-color hover:opacity-90"
+              ? "text-text-on-color hover:opacity-90"
               : hasText
-              ? "bg-button-primary text-text-on-color hover:bg-button-primary-hover active:bg-button-primary-active"
-              : "bg-layer-01 text-text-disabled cursor-not-allowed"
+              ? "text-text-on-color hover:opacity-90 active:opacity-75"
+              : "text-text-disabled cursor-not-allowed"
           }`}
+          style={
+            isStreaming
+              ? { background: "var(--color-button-danger)" }
+              : hasText
+              ? { background: "var(--baai-gradient-logo)", boxShadow: "var(--baai-glow-sm)" }
+              : { background: "transparent" }
+          }
           title={isStreaming ? "Stop" : "Send"}
         >
           {isStreaming ? <IconStop /> : <IconSend />}
