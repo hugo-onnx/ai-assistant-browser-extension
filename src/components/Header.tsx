@@ -36,7 +36,7 @@ export default function Header({ onClear, hasMessages, connectionStatus, isDark,
   return (
     <header
       className="flex items-center justify-between px-4 bg-background border-b border-border-subtle-00"
-      style={{ minHeight: "48px", borderBottomColor: "rgba(74, 143, 255, 0.15)" }}
+      style={{ minHeight: "48px", borderBottomColor: "rgba(74, 143, 255, 0.3)" }}
     >
       <div className="flex items-center gap-2.5">
         <div
