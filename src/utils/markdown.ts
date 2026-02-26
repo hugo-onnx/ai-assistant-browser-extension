@@ -52,7 +52,7 @@ marked.use({
         html += "<tr>";
         for (const cell of header) {
           const align = cell.align ? ` style="text-align:${cell.align}"` : "";
-          html += `<th${align}>${cell.text}</th>`;
+          html += `<th${align}>${marked.parseInline(cell.text || "") as string}</th>`;
         }
         html += "</tr>";
       }
