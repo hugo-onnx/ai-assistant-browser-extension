@@ -48,8 +48,8 @@
   --color-tag-bg-gray: var(--carbon-tag-bg-gray);
   --color-tag-text-gray: var(--carbon-tag-text-gray);
   --color-code-block-bg: var(--carbon-code-block-bg);
-  --font-sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "IBM Plex Mono", "Menlo", "DejaVu Sans Mono", monospace;
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Menlo", "DejaVu Sans Mono", monospace;
 }
 
 :root,
