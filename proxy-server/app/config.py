@@ -1,11 +1,20 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
+    # Provider selection
+    provider: Literal["groq", "cerebras"] = "groq"
+
     # Groq
-    api_key: str
-    model: str = "llama-3.1-8b-instant"
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.1-8b-instant"
+
+    # Cerebras
+    cerebras_api_key: str = ""
+    cerebras_model: str = "llama3.1-8b"
 
     # Sampling parameters
     temperature: float = 1.0
