@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Application startup and shutdown events."""
     settings = get_settings()
-    logger.info("Starting AI Assistant Proxy (Groq)")
-    logger.info("Model: %s", settings.model)
+    logger.info("Starting AI Assistant Proxy (provider: %s)", settings.provider)
+    logger.info("Model: %s", settings.groq_model if settings.provider == "groq" else settings.cerebras_model)
     logger.info("CORS origins: %s", settings.cors_origins)
     yield
     logger.info("Shutting down AI Assistant Proxy")
@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AI Assistant Proxy",
-    description="FastAPI proxy for Groq with streaming support",
+    description="FastAPI proxy for Groq and Cerebras with streaming support",
     version="1.0.0",
     lifespan=lifespan,
 )
