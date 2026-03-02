@@ -56,7 +56,7 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }: Cha
       className="bg-background px-3 py-3"
       style={{ borderTop: "1px solid rgba(74, 143, 255, 0.12)" }}
     >
-      <div className="baai-input-wrapper flex items-end gap-0 bg-layer-01">
+      <div className="input-wrapper flex items-end gap-0 bg-layer-01">
         <textarea
           ref={textareaRef}
           value={text}
@@ -81,7 +81,7 @@ export default function ChatInput({ onSend, onStop, isStreaming, disabled }: Cha
             isStreaming
               ? { background: "var(--color-button-danger)" }
               : hasText
-              ? { background: "var(--baai-gradient-logo)", boxShadow: "var(--baai-glow-sm)" }
+              ? { background: "var(--gradient-logo)", boxShadow: "var(--glow-sm)" }
               : { background: "transparent", color: "var(--color-border-strong-01)", opacity: 0.6 }
           }
           title={isStreaming ? "Stop" : "Send"}
