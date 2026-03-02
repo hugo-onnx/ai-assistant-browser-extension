@@ -52,7 +52,7 @@ function Options() {
           </div>
         </div>
 
-        {/* Carbon form group */}
+        {/* Form group */}
         <div className="bg-layer-01 p-8">
           {/* Provider selector */}
           <div className="mb-8">
