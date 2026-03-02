@@ -54,8 +54,8 @@ function formatTime(isoString: string): string {
 
 const AiAvatar = () => (
   <div
-    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center baai-avatar-glow"
-    style={{ background: "var(--baai-gradient-accent)" }}
+    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center avatar-glow"
+    style={{ background: "var(--gradient-accent)" }}
   >
     <span className="text-[10px] font-bold text-white tracking-tight">AI</span>
   </div>
@@ -127,7 +127,7 @@ function UserMessage({ content, timestamp }: { content: string; timestamp: strin
       <div
         className="max-w-[85%] px-4 py-3 leading-relaxed text-white rounded-2xl rounded-br-sm"
         style={{
-          background: "var(--baai-gradient-blue)",
+          background: "var(--gradient-blue)",
           boxShadow: "0 4px 16px rgba(74, 143, 255, 0.2)",
           fontSize: "16px",
         }}
