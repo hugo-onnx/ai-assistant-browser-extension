@@ -41,7 +41,7 @@ export default function Header({ onClear, hasMessages, connectionStatus, isDark,
       <div className="flex items-center gap-2.5">
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: "var(--baai-gradient-logo)", boxShadow: "var(--baai-glow-sm)" }}
+          style={{ background: "var(--gradient-logo)", boxShadow: "var(--glow-sm)" }}
         >
           <span className="text-[9px] font-bold text-white leading-none tracking-wider">AI</span>
         </div>
