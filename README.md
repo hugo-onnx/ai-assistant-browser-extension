@@ -15,7 +15,6 @@ A Google Chrome extension that lets you chat with an AI directly from your brows
 │            Chrome Extension (Side Panel)     │
 │                                              │
 │  React + Vite + Tailwind CSS v4              │
-│  IBM Carbon Design System (g100 theme)       │
 │                                              │
 │  Components:                                 │
 │   ├── Header (UI Shell)                      │
@@ -68,9 +67,7 @@ A Google Chrome extension that lets you chat with an AI directly from your brows
 - **Provider selection** — Switch between Groq and Cerebras from the extension's Settings page; the selected provider is sent with every request
 
 ### Design
-- **IBM Carbon Design System** — g100 (dark) and g10 (light) themes with official color tokens
 - **Dark/light toggle** — Switch themes from the header; preference persists across sessions
-- **IBM Plex fonts** — IBM Plex Sans and IBM Plex Mono
 - **Connection status** — Live indicator dot showing proxy availability
 
 ### Security
@@ -306,8 +303,6 @@ data: {"event": "done"}
 | React | 19 | UI framework |
 | Vite | 6 | Build tool |
 | Tailwind CSS | 4 | Utility-first CSS |
-| IBM Carbon Design | g100/g10 | Dark & light theme tokens |
-| IBM Plex Sans/Mono | — | Typography |
 | Marked | 15 | Markdown to HTML |
 | highlight.js | 11 | Code syntax highlighting |
 | DOMPurify | 3 | XSS sanitization |
@@ -370,7 +365,7 @@ podman run -p 8000:8000 --env-file .env ai-assistant-proxy
 | `Failed to get a response` | Check your API key in `.env` is valid and has quota |
 | `422 Unprocessable Entity` | Request validation failed, check message format |
 | Extension not loading | Ensure you loaded the `dist/` folder, not the source root |
-| Fonts not loading | Extension needs internet access for IBM Plex fonts CDN |
+| Fonts not loading | Extension needs internet access for fonts CDN |
 
 ---
 
