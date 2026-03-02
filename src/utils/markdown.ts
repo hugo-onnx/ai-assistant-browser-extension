@@ -46,6 +46,10 @@ marked.use({
       const langClass = lang ? ` language-${lang}` : "";
       return `<pre><code class="hljs${langClass}">${highlighted}</code></pre>`;
     },
+    link({ href, title, text }: Tokens.Link): string {
+      const titleAttr = title ? ` title="${title}"` : "";
+      return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+    },
     table({ header, rows }: Tokens.Table): string {
       let html = "<table><thead>";
       if (header && header.length > 0) {
