@@ -1,3 +1,5 @@
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -15,6 +17,7 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[Message] = Field(..., min_length=1, max_length=200)
+    provider: Optional[Literal["groq", "cerebras"]] = None
 
 
 class HealthResponse(BaseModel):
