@@ -93,12 +93,12 @@ ai-assistant-browser-extension/
 │   └── icons/                    # Extension icons
 └── src/
     ├── types.ts                  # Shared TypeScript interfaces
-    ├── index.css                 # Carbon g100/g10 theme tokens + markdown styles
+    ├── index.css                 # Theme tokens (g100/g10) + markdown styles
     ├── sidepanel.tsx             # React mount for side panel
     ├── options.tsx               # Settings page (proxy URL + provider)
     ├── components/
     │   ├── App.tsx               # Main layout (header + chat + input)
-    │   ├── Header.tsx            # Carbon UI Shell header bar + theme toggle
+    │   ├── Header.tsx            # Header bar + theme toggle
     │   ├── ChatMessage.tsx       # User/AI bubbles, copy, retry, timestamps
     │   ├── ChatInput.tsx         # Text input + send/stop button
     │   └── WelcomeScreen.tsx     # Landing screen with suggestion tiles
