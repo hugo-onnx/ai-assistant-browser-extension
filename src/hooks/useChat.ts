@@ -30,9 +30,12 @@ export function useChat(): UseChatReturn {
     await setStorage({ messages: msgs });
   }, []);
 
-  const getProxyUrl = useCallback(async (): Promise<string> => {
-    const sync = await getSyncStorage(["proxyUrl"]);
-    return (sync.proxyUrl as string) || DEFAULT_PROXY_URL;
+  const getProxyConfig = useCallback(async (): Promise<{ url: string; provider: string }> => {
+    const sync = await getSyncStorage(["proxyUrl", "provider"]);
+    return {
+      url: (sync.proxyUrl as string) || DEFAULT_PROXY_URL,
+      provider: (sync.provider as string) || "groq",
+    };
   }, []);
 
   const sendMessage = useCallback(
@@ -60,7 +63,7 @@ export function useChat(): UseChatReturn {
       setMessages(updatedMessages);
       setIsStreaming(true);
 
-      const proxyUrl = await getProxyUrl();
+      const { url: proxyUrl, provider } = await getProxyConfig();
       const controller = new AbortController();
       abortRef.current = controller;
 
@@ -74,7 +77,7 @@ export function useChat(): UseChatReturn {
         const response = await fetch(`${proxyUrl}/chat/stream`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: historyMessages }),
+          body: JSON.stringify({ messages: historyMessages, provider }),
           signal: controller.signal,
         });
 
@@ -174,7 +177,7 @@ export function useChat(): UseChatReturn {
         abortRef.current = null;
       }
     },
-    [messages, isStreaming, getProxyUrl, saveState]
+    [messages, isStreaming, getProxyConfig, saveState]
   );
 
   const stopStreaming = useCallback(() => {
