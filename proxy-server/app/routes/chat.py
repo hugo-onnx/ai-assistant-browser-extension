@@ -13,31 +13,48 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+CEREBRAS_URL = "https://api.cerebras.ai/v1/chat/completions"
 
 
-async def _stream_groq(request: ChatRequest) -> AsyncGenerator[dict, None]:
+async def _stream_chat(request: ChatRequest) -> AsyncGenerator[dict, None]:
     settings = get_settings()
+    provider = request.provider or settings.provider
+
+    if provider == "cerebras":
+        url = CEREBRAS_URL
+        api_key = settings.cerebras_api_key
+        model = settings.cerebras_model
+    else:
+        url = GROQ_URL
+        api_key = settings.groq_api_key
+        model = settings.groq_model
+
     headers = {
-        "Authorization": f"Bearer {settings.api_key}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
     payload = {
-        "model": settings.model,
+        "model": model,
         "messages": [{"role": m.role, "content": m.content} for m in request.messages],
         "temperature": settings.temperature,
         "top_p": settings.top_p,
-        "max_completion_tokens": settings.max_completion_tokens,
         "stream": True,
     }
+
+    # Cerebras uses max_tokens; Groq uses max_completion_tokens
+    if provider == "cerebras":
+        payload["max_tokens"] = settings.max_completion_tokens
+    else:
+        payload["max_completion_tokens"] = settings.max_completion_tokens
 
     yield {"event": "start"}
 
     try:
         async with httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=30.0)) as client:
-            async with client.stream("POST", GROQ_URL, headers=headers, json=payload) as response:
+            async with client.stream("POST", url, headers=headers, json=payload) as response:
                 if response.status_code != 200:
                     body = await response.aread()
-                    logger.error("Groq error %d: %s", response.status_code, body.decode())
+                    logger.error("%s error %d: %s", provider, response.status_code, body.decode())
                     yield {"event": "error", "message": "Failed to get a response from the AI service"}
                     return
 
@@ -61,7 +78,7 @@ async def _stream_groq(request: ChatRequest) -> AsyncGenerator[dict, None]:
                         continue
 
     except httpx.TimeoutException:
-        logger.error("Timeout connecting to Groq")
+        logger.error("Timeout connecting to %s", provider)
         yield {"event": "error", "message": "Request timed out"}
     except httpx.HTTPError as e:
         logger.error("HTTP error: %s", e)
@@ -74,11 +91,11 @@ async def _stream_groq(request: ChatRequest) -> AsyncGenerator[dict, None]:
 @router.post("/stream")
 async def chat_stream(request: ChatRequest):
     """
-    Stream a chat response from Groq.
+    Stream a chat response from Groq or Cerebras.
     Returns SSE events: start, delta, done, error
     """
     async def event_generator():
-        async for event in _stream_groq(request):
+        async for event in _stream_chat(request):
             yield {"data": json.dumps(event)}
 
     return EventSourceResponse(event_generator())
