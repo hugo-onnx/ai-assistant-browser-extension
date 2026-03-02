@@ -3,8 +3,11 @@ import ReactDOM from "react-dom/client";
 import { getStorage, getSyncStorage, setSyncStorage } from "./utils/storage";
 import "./index.css";
 
+type Provider = "groq" | "cerebras";
+
 function Options() {
   const [proxyUrl, setProxyUrl] = useState("http://localhost:8000");
+  const [provider, setProvider] = useState<Provider>("groq");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -14,14 +17,15 @@ function Options() {
       }
     });
 
-    getSyncStorage(["proxyUrl"]).then((data) => {
+    getSyncStorage(["proxyUrl", "provider"]).then((data) => {
       if (data.proxyUrl) setProxyUrl(data.proxyUrl as string);
+      if (data.provider) setProvider(data.provider as Provider);
     });
   }, []);
 
   const handleSave = async () => {
     const url = proxyUrl.replace(/\/+$/, "");
-    await setSyncStorage({ proxyUrl: url });
+    await setSyncStorage({ proxyUrl: url, provider });
     setProxyUrl(url);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -50,6 +54,39 @@ function Options() {
 
         {/* Carbon form group */}
         <div className="bg-layer-01 p-8">
+          {/* Provider selector */}
+          <div className="mb-8">
+            <label className="block text-sm font-normal text-text-secondary mb-3">
+              Inference Provider
+            </label>
+            <div className="flex gap-0">
+              {(["groq", "cerebras"] as Provider[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setProvider(p)}
+                  className="flex-1 h-10 text-sm font-normal transition-colors border border-border-strong-01"
+                  style={{
+                    background:
+                      provider === p
+                        ? "var(--color-button-primary)"
+                        : "var(--color-layer-02)",
+                    color:
+                      provider === p
+                        ? "var(--color-text-on-color)"
+                        : "var(--color-text-secondary)",
+                    borderColor: provider === p ? "transparent" : undefined,
+                  }}
+                >
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-text-helper mt-3 leading-relaxed">
+              The inference provider your proxy server uses. Configure the matching API key in your server's <code className="text-xs">.env</code> file.
+            </p>
+          </div>
+
+          {/* Proxy URL */}
           <div className="mb-8">
             <label className="block text-sm font-normal text-text-secondary mb-2">
               Proxy Server URL
@@ -62,7 +99,7 @@ function Options() {
               className="w-full bg-layer-01 text-text-primary placeholder-text-placeholder text-base outline-none px-4 h-12 border-b-2 border-border-strong-01 focus:border-interactive transition-colors"
             />
             <p className="text-sm text-text-helper mt-3 leading-relaxed">
-              The URL of your FastAPI proxy server (supports OpenAI and Claude).
+              The URL of your FastAPI proxy server.
             </p>
           </div>
 
