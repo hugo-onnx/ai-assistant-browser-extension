@@ -9,7 +9,7 @@ interface UseThemeReturn {
 }
 
 export function useTheme(): UseThemeReturn {
-  const [theme, setThemeState] = useState<Theme>("g100");
+  const [theme, setThemeState] = useState<Theme>("dark");
 
   useEffect(() => {
     getStorage(["theme"]).then((data) => {
@@ -27,11 +27,11 @@ export function useTheme(): UseThemeReturn {
 
   const toggleTheme = useCallback(() => {
     setThemeState((prev) => {
-      const next: Theme = prev === "g100" ? "g10" : "g100";
+      const next: Theme = prev === "dark" ? "light" : "dark";
       setStorage({ theme: next });
       return next;
     });
   }, []);
 
-  return { theme, isDark: theme === "g100", toggleTheme };
+  return { theme, isDark: theme === "dark", toggleTheme };
 }
