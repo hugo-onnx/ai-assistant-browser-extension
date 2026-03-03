@@ -17,7 +17,7 @@ export interface SSEEvent {
 
 export type ConnectionStatus = "connected" | "disconnected" | "checking";
 
-export type Theme = "g100" | "g10";
+export type Theme = "dark" | "light";
 
 export interface StorageData {
   messages?: ChatMessage[];
