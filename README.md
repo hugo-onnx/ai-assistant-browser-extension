@@ -93,7 +93,7 @@ ai-assistant-browser-extension/
 │   └── icons/                    # Extension icons
 └── src/
     ├── types.ts                  # Shared TypeScript interfaces
-    ├── index.css                 # Theme tokens (g100/g10) + markdown styles
+    ├── index.css                 # Dark/light theme + markdown styles
     ├── sidepanel.tsx             # React mount for side panel
     ├── options.tsx               # Settings page (proxy URL + provider)
     ├── components/
@@ -105,7 +105,7 @@ ai-assistant-browser-extension/
     ├── hooks/
     │   ├── useChat.ts            # Chat state, SSE streaming, provider selection
     │   ├── useConnectionStatus.ts # Proxy health polling
-    │   └── useTheme.ts           # Dark/light theme toggle (g100/g10)
+    │   └── useTheme.ts           # Dark/light theme toggle
     └── utils/
         ├── markdown.ts           # Marked + highlight.js + DOMPurify renderer
         └── storage.ts            # chrome.storage abstraction
